@@ -1,0 +1,200 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol";
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+h1,
+h2,
+h3,
+h4 {
+    color: #1e3a8a;
+    text-align: center;
+}
+.hidden {
+    display: none;
+}
+#game-setup,
+.startup-card,
+#actions-container,
+#log {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+#game-board {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+    align-items: flex-start;
+}
+#startup-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.startup-card {
+    width: 320px;
+    transition: all 0.2s ease-in-out;
+}
+.startup-card.active-turn {
+    border-color: #3b82f6;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+    transform: translateY(-5px);
+}
+.startup-card ul {
+    list-style: none;
+    padding: 0;
+}
+.radar-chart-container {
+    width: 100%;
+    max-width: 300px;
+    margin: 15px auto;
+}
+button {
+    margin: 0.5rem 0.25rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background-color: #3b82f6;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+button:hover:not(:disabled) {
+    background-color: #2563eb;
+}
+button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+fieldset {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+legend {
+    font-weight: bold;
+    color: #1e3a8a;
+}
+#log {
+    max-height: 400px;
+    overflow-y: auto;
+}
+#log-list {
+    list-style: none;
+    padding: 0;
+    font-size: 0.9rem;
+}
+#log-list li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+#log-list li:first-child {
+    font-weight: bold;
+}
+#acoes-disponiveis {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+}
+.acao-button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    text-align: left;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #333;
+}
+.acao-button:hover:not(:disabled) {
+    background-color: #e5e7eb;
+}
+.player-name {
+    cursor: pointer;
+    font-weight: 500;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.player-name:hover {
+    background-color: #eff6ff;
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-top: 8px solid;
+}
+#classe-modal-descricao {
+    text-align: justify;
+    margin-top: 1rem;
+}
+.modal-content.classe-lider {
+    border-color: #3b82f6;
+}
+.modal-content.classe-visionario {
+    border-color: #8b5cf6;
+}
+.modal-content.classe-desbravador {
+    border-color: #ef4444;
+}
+.modal-content.classe-estrategista {
+    border-color: #f59e0b;
+}
+.modal-content.classe-guardiao {
+    border-color: #10b981;
+}
