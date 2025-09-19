@@ -1,6 +1,6 @@
 # Empreendedorismo Guru Web
 
-![Empreendedorismo Guru Web](httpsd://i.imgur.com/8a5C4gH.png)
+![Empreendedorismo Guru Web](https://static.wixstatic.com/media/b7931b_d2a505f381844b24a27edcba212a56bf~mv2.png/v1/fill/w_264,h_151,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Logomarca%20Alternativa%20Empreendedorismo%20Guru.png)
 
 Um RPG de negócios multiplayer baseado no jogo educacional "Empreendedorismo Guru". [cite_start]Este projeto é uma adaptação digital e interativa que busca simular a jornada de criação e gestão de uma startup, com foco em aprendizado e tomada de decisão estratégica.
 
