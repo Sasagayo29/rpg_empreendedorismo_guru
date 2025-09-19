@@ -2,19 +2,19 @@
 
 ![Empreendedorismo Guru Web](httpsd://i.imgur.com/8a5C4gH.png)
 
-Um RPG de negócios multiplayer baseado no jogo educacional "Empreendedorismo Guru". [cite_start]Este projeto é uma adaptação digital e interativa que busca simular a jornada de criação e gestão de uma startup, com foco em aprendizado e tomada de decisão estratégica. [cite: 6, 7]
+Um RPG de negócios multiplayer baseado no jogo educacional "Empreendedorismo Guru". [cite_start]Este projeto é uma adaptação digital e interativa que busca simular a jornada de criação e gestão de uma startup, com foco em aprendizado e tomada de decisão estratégica.
 
-[cite_start]O jogo foi projetado para ser uma ferramenta dinâmica no processo de ensino-aprendizagem em disciplinas de Empreendedorismo, Gestão ou Negócios, promovendo a participação ativa dos estudantes. [cite: 7]
+O jogo foi projetado para ser uma ferramenta dinâmica no processo de ensino-aprendizagem em disciplinas de Empreendedorismo, Gestão ou Negócios, promovendo a participação ativa dos estudantes.
 
 ## ✨ Funcionalidades
 
-* [cite_start]**Criação de Jogo Flexível:** Configure uma partida com múltiplas startups (equipes) e defina o número de jogadores por equipe (3 ou 4). [cite: 8]
-* [cite_start]**Classes de Empreendedor:** Cada jogador escolhe uma das cinco classes distintas (Líder, Visionário, Desbravador, Estrategista e Guardião), cada uma com uma afinidade especial a uma das dimensões do negócio. [cite: 26, 148]
-* [cite_start]**Cinco Dimensões de Gestão:** As startups evoluem em cinco pilares fundamentais: Equipe, Produto, Mercado, Competitividade e Recursos. [cite: 124]
-* [cite_start]**Ações Empreendedoras Estratégicas:** O progresso é alcançado através da execução de 50 ações empreendedoras detalhadas, que representam tarefas e decisões reais do mundo dos negócios. [cite: 168, 170]
-* [cite_start]**Sistema de Turnos e Níveis:** O jogo opera em turnos, onde cada equipe realiza uma ação coletiva e uma individual. [cite: 176, 177] [cite_start]Uma startup só avança de nível quando todas as cinco dimensões atingem uma pontuação equilibrada, simulando a necessidade de uma gestão holística. [cite: 182, 183]
-* [cite_start]**Baralho de Eventos:** Ao subir de nível, um evento aleatório (positivo ou negativo) é sorteado de um baralho com mais de 20 cartas, introduzindo a incerteza e a necessidade de adaptação, elementos centrais no empreendedorismo. [cite: 203, 204, 205, 206]
-* [cite_start]**Dashboard Visual:** A interface apresenta um gráfico de radar para cada startup, permitindo uma visualização clara e instantânea do estado de desenvolvimento de suas cinco dimensões. [cite: 122]
+* **Criação de Jogo Flexível:** Configure uma partida com múltiplas startups (equipes) e defina o número de jogadores por equipe (3 ou 4). 
+* **Classes de Empreendedor:** Cada jogador escolhe uma das cinco classes distintas (Líder, Visionário, Desbravador, Estrategista e Guardião), cada uma com uma afinidade especial a uma das dimensões do negócio. [cite: 26, 148]
+* **Cinco Dimensões de Gestão:** As startups evoluem em cinco pilares fundamentais: Equipe, Produto, Mercado, Competitividade e Recursos. 
+* **Ações Empreendedoras Estratégicas:** O progresso é alcançado através da execução de 50 ações empreendedoras detalhadas, que representam tarefas e decisões reais do mundo dos negócios.
+* **Sistema de Turnos e Níveis:** O jogo opera em turnos, onde cada equipe realiza uma ação coletiva e uma individual. Uma startup só avança de nível quando todas as cinco dimensões atingem uma pontuação equilibrada, simulando a necessidade de uma gestão holística.
+* **Baralho de Eventos:** Ao subir de nível, um evento aleatório (positivo ou negativo) é sorteado de um baralho com mais de 20 cartas, introduzindo a incerteza e a necessidade de adaptação, elementos centrais no empreendedorismo. 
+* **Dashboard Visual:** A interface apresenta um gráfico de radar para cada startup, permitindo uma visualização clara e instantânea do estado de desenvolvimento de suas cinco dimensões.
 
 ## 💻 Tecnologias Utilizadas
 
