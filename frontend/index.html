@@ -4,64 +4,294 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Empreendedorismo Guru</title>
-        <link rel="icon" type="image/png" href="/frontend/css/img/Logo.svg" />
+        <link rel="icon" type="image/png" href="/css/img/Logo.svg" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link rel="stylesheet" href="/frontend/css/style.css" />
+        <link rel="stylesheet" href="/css/style.css" />
     </head>
     <body>
         <div class="container">
-            <h1>Empreendedorismo Guru Web</h1>
+            <div id="home-screen">
+                <div class="header-controls">
+                    <button id="theme-toggle-btn-home" class="theme-toggle-btn">
+                        🌙
+                    </button>
+                </div>
 
-            <div id="game-setup">
-                <h2>Configurar o Jogo</h2>
-                <form id="setup-form">
-                    <div class="form-group">
-                        <label for="num-startups">Número de Startups:</label>
-                        <input
-                            type="number"
-                            id="num-startups"
-                            min="1"
-                            max="4"
-                            value="2"
-                        />
-                    </div>
-                    <div class="form-group">
-                        <label for="num-jogadores">Jogadores por Equipe:</label>
-                        <select id="num-jogadores">
-                            <option value="3" selected>3 Jogadores</option>
-                            <option value="4">4 Jogadores</option>
-                        </select>
-                    </div>
-                    <div id="equipes-forms-container"></div>
-                    <button type="submit">Iniciar Jogo</button>
-                </form>
+                <h1>Empreendedorismo Guru Web</h1>
+                <p class="subtitle">Bem-vindo ao RPG de Negócios</p>
+                <div class="home-menu">
+                    <button id="home-new-game-btn">Iniciar Novo Jogo</button>
+                    <button
+                        id="home-load-game-btn"
+                        class="button-secondary hidden"
+                    >
+                        Continuar Jogo Salvo
+                    </button>
+                </div>
             </div>
 
+            <div id="game-setup" class="hidden">
+                <h2>Configurar Novo Jogo</h2>
+
+                <div class="class-library-button-container">
+                    <button id="ver-classes-btn" class="button-secondary">
+                        Ver Classes
+                    </button>
+                </div>
+
+                <form id="setup-form">
+                    <div class="setup-config-bar">
+                        <div class="form-group">
+                            <label for="num-startups"
+                                >Número de Startups:</label
+                            >
+                            <input
+                                type="number"
+                                id="num-startups"
+                                min="1"
+                                max="4"
+                                value="2"
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="num-jogadores"
+                                >Jogadores por Equipe:</label
+                            >
+                            <select id="num-jogadores">
+                                <option value="3" selected>3 Jogadores</option>
+                                <option value="4">4 Jogadores</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="setup-navigation"></div>
+
+                    <div id="equipes-forms-container"></div>
+
+                    <div id="setup-step-controls">
+                        <button
+                            type="button"
+                            id="prev-step-btn"
+                            class="button-secondary hidden"
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            type="button"
+                            id="next-step-btn"
+                            class="button-secondary"
+                        >
+                            Próximo
+                        </button>
+                        <button
+                            type="submit"
+                            id="start-game-btn"
+                            class="hidden"
+                        >
+                            Iniciar Jogo
+                        </button>
+                    </div>
+                </form>
+            </div>
             <div id="game-board" class="hidden">
+                <div id="game-header">
+                    <h2>
+                        Turno da Startup:
+                        <span id="current-startup-name"></span>
+                    </h2>
+
+                    <div class="header-controls">
+                        <button
+                            id="theme-toggle-btn-game"
+                            class="theme-toggle-btn"
+                        >
+                            🌙
+                        </button>
+                        <div class="turn-controls-container">
+                            <button
+                                type="button"
+                                id="save-game-btn"
+                                class="button-secondary"
+                            >
+                                Salvar Jogo
+                            </button>
+                            <button id="next-turn-btn" class="hidden">
+                                Próximo Turno
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="startup-cards-container"></div>
+
                 <div id="controls-and-log">
                     <div id="actions-container">
-                        <h2>
-                            Turno da Startup:
-                            <span id="current-startup-name"></span>
-                        </h2>
                         <div id="player-turn-selector"></div>
                         <div id="action-selection-area">
                             <h4>Escolha a Ação Empreendedora:</h4>
+
+                            <div id="dimensao-filtros"></div>
+
                             <div id="acoes-disponiveis"></div>
                         </div>
-                        <button id="next-turn-btn" class="hidden">
-                            Próximo Turno
-                        </button>
                     </div>
                     <div id="log">
                         <h3>Log de Eventos</h3>
                         <ul id="log-list"></ul>
                     </div>
                 </div>
+
+                <div id="player-hud" class="hidden">
+                    <img id="hud-jogador-img" src="" alt="Retrato do Jogador" />
+                    <div class="hud-info">
+                        <h4 id="hud-classe-nome"></h4>
+                        <p id="hud-jogador-nome"></p>
+                        <p id="hud-afinidade-desc"></p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <script src="/frontend/js/script.js"></script>
+        <div id="biblioteca-modal" class="modal-overlay hidden">
+            <div class="biblioteca-content">
+                <h2>As 5 Classes de Empreendedores</h2>
+                <div class="biblioteca-container">
+                    <div class="biblioteca-card classe-lider">
+                        <img
+                            src="/css/img/portraits/lider.png"
+                            alt="Líder"
+                            class="biblioteca-img"
+                        />
+                        <h3>Líder</h3>
+                        <p>
+                            Possuem um talento especial para manter equipes
+                            motivadas e produtivas. Sua liderança eficaz promove
+                            a harmonia e a colaboração entre os membros do
+                            negócio, contribuindo significativamente para o
+                            desenvolvimento pessoal dos colaboradores e a
+                            evolução das práticas de trabalho. O carismático.
+                        </p>
+                    </div>
+                    <div class="biblioteca-card classe-desbravador">
+                        <img
+                            src="/css/img/portraits/desbravador.png"
+                            alt="Desbravador"
+                            class="biblioteca-img"
+                        />
+                        <h3>Desbravador</h3>
+                        <p>
+                            Empreendedores dotados de uma capacidade de
+                            comunicação excepcional. Eles têm um talento
+                            especial para identificar e atrair clientes,
+                            transmitindo com eficácia os valores e as vantagens
+                            que a empresa tem a oferecer. O vendedor.
+                        </p>
+                    </div>
+                    <div class="biblioteca-card classe-visionario">
+                        <img
+                            src="/css/img/portraits/visionario.png"
+                            alt="Visionário"
+                            class="biblioteca-img"
+                        />
+                        <h3>Visionário</h3>
+                        <p>
+                            Destacados por sua grande criatividade e habilidade
+                            para dominar novas tecnologias. Eles inspiram suas
+                            equipes a "pensar fora da caixa" e mantêm um foco
+                            constante no aprimoramento dos produtos e serviços
+                            da empresa. O inventor.
+                        </p>
+                    </div>
+                    <div class="biblioteca-card classe-guardiao">
+                        <img
+                            src="/css/img/portraits/guardiao.png"
+                            alt="Guardião"
+                            class="biblioteca-img"
+                        />
+                        <h3>Guardião</h3>
+                        <p>
+                            Se distinguem por sua excepcional capacidade de
+                            raciocínio lógico. Eles são especialistas em
+                            otimizar o uso de recursos dentro da empresa e
+                            excelentes na construção de argumentos convincentes
+                            para captar recursos junto a investidores. O
+                            racionalista.
+                        </p>
+                    </div>
+                    <div class="biblioteca-card classe-estrategista">
+                        <img
+                            src="/css/img/portraits/estrategista.png"
+                            alt="Estrategista"
+                            class="biblioteca-img"
+                        />
+                        <h3>Estrategista</h3>
+                        <p>
+                            Notáveis por sua percepção apurada, habilidade em
+                            antecipar cenários futuros e adaptar a empresa às
+                            mudanças previstas. Eles buscam ativamente
+                            informações que possam beneficiar o negócio e
+                            promovem uma maior dinâmica nas operações da
+                            empresa. O vidente.
+                        </p>
+                    </div>
+                </div>
+                <button id="fechar-biblioteca-btn">Fechar</button>
+            </div>
+        </div>
+        <div id="classe-modal" class="modal-overlay hidden">
+            <div class="flashcard-container">
+                <div id="classe-card" class="flashcard">
+                    <div id="classe-card-front" class="front"></div>
+                    <div id="classe-card-back" class="back"></div>
+                </div>
+            </div>
+        </div>
+        <div id="evento-modal" class="modal-overlay hidden">
+            <div class="flashcard-container">
+                <div id="evento-card" class="flashcard">
+                    <div id="evento-card-front" class="front">
+                        <h3>Evento Misterioso!</h3>
+                        <p>Clique para revelar</p>
+                    </div>
+                    <div id="evento-card-back" class="back">
+                        <h3 id="evento-nome"></h3>
+                        <p id="evento-descricao"></p>
+                        <p
+                            id="evento-resultado"
+                            class="evento-resultado-texto"
+                        ></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="fim-de-jogo-modal" class="modal-overlay hidden">
+            <div class="fim-de-jogo-content">
+                <h2>O Jogo Terminou!</h2>
+                <h3 id="vencedor-nome"></h3>
+                <p>
+                    Parabéns por completar a jornada do Empreendedorismo Guru!
+                </p>
+                <button id="jogar-novamente-btn">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <audio id="audio-clique" src="/audio/clique.mp3" preload="auto"></audio>
+        <audio
+            id="audio-virar-carta"
+            src="/audio/virar-carta.mp3"
+            preload="auto"
+        ></audio>
+        <audio
+            id="audio-sucesso"
+            src="/audio/sucesso.mp3"
+            preload="auto"
+        ></audio>
+        <audio id="audio-falha" src="/audio/falha.mp3" preload="auto"></audio>
+        <audio
+            id="audio-vitoria"
+            src="/audio/vitoria.mp3"
+            preload="auto"
+        ></audio>
+
+        <script src="/js/script.js?v=23"></script>
     </body>
 </html>

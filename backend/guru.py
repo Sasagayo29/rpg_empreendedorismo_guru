@@ -5,7 +5,7 @@ ACOES_EMPREENDEDORAS = {
     "equipe": [{"id": "eq1", "nome": "Estabelecimento de Metas"}, {"id": "eq2", "nome": "Definição de Papéis e Responsabilidades"}, {"id": "eq3", "nome": "Criação do Código de Cultura da Startup"}, {"id": "eq4", "nome": "Workshop de Feedback Construtivo"}, {"id": "eq5", "nome": "Mapeamento de Competências (Skill Matrix)"}, {"id": "eq6", "nome": "Plano de Reuniões Eficazes (One-on-Ones)"}, {"id": "eq7", "nome": "Pesquisa de Clima Organizacional"}, {"id": "eq8", "nome": "Desenho do Plano de Onboarding"}, {"id": "eq9", "nome": "Sessão de Resolução de Conflitos"}, {"id": "eq10", "nome": "Apresentação da Visão de Longo Prazo"}],
     "produto": [{"id": "pd1", "nome": "Brainstorming de Funcionalidades (Features)"}, {"id": "pd2", "nome": "Criação de um Protótipo de Baixa Fidelidade"}, {"id": "pd3", "nome": "Sessão de Teste de Usabilidade com Usuários"}, {"id": "pd4", "nome": "Desenvolvimento do MVP (Mínimo Produto Viável)"}, {"id": "pd5", "nome": "Elaboração do Roadmap do Produto"}, {"id": "pd6", "nome": "Análise de Métricas de Engajamento (Analytics)"}, {"id": "pd7", "nome": "Workshop de Design Thinking"}, {"id": "pd8", "nome": "Definição da Proposta Única de Valor (PUV)"}, {"id": "pd9", "nome": "Pesquisa de Tecnologias Emergentes"}, {"id": "pd10", "nome": "Plano de Lançamento (Go-to-Market)"}],
     "mercado": [{"id": "me1", "nome": "Estratégias de Relacionamento"}, {"id": "me2", "nome": "Criação de Personas de Clientes"}, {"id": "me3", "nome": "Análise de Canais de Aquisição (Marketing Digital)"}, {"id": "me4", "nome": "Desenvolvimento de Conteúdo para Redes Sociais"}, {"id": "me5", "nome": "Campanha de E-mail Marketing"}, {"id": "me6", "nome": "Pesquisa de Satisfação de Clientes (NPS)"}, {"id": "me7", "nome": "Definição da Estratégia de Preços (Pricing)"}, {"id": "me8", "nome": "Entrevistas com Clientes Potenciais"}, {"id": "me9", "nome": "Criação de um Pitch de Vendas"}, {"id": "me10", "nome": "Análise da Jornada do Cliente"}],
-    "competitividade": [{"id": "ct1", "nome": "Análise de Concorrentes (Benchmarking)"}, {"id": "ct2", "nome": "Análise SWOT (Forças, Fraquezas, Oportunidades, Ameaças)"}, {"id": "ct3", "nome": "Mapeamento de Tendências de Mercado"}, {"id": "ct4", "nome": "Definição de Diferenciais Competitivos"}, {"id": "ct5", "nome": "Plano de Adaptação a Mudanças (Pivot)"}, {"id": "ct6", "nome": "Análise das 5 Forças de Porter"}, {"id": "ct7", "nome": "Criação de um Plano de Expansão"}, {"id": "ct8", "nome": "Estudo de Barreiras de Entrada no Mercado"}, {"id": "ct9", "nome": "Registro de Propriedade Intelectual (Marca)"}, {"id": "ct10", "nome": "Simulação de Cenários de Crise"}],
+    "competitividade": [{"id": "ct1", "nome": "Análise de Concorrentes (Benchmarking)"}, {"id": "ct2", "nome": "Análise de SWOT (Forças, Fraquezas, Oportunidades, Ameaças)"}, {"id": "ct3", "nome": "Mapeamento de Tendências de Mercado"}, {"id": "ct4", "nome": "Definição de Diferenciais Competitivos"}, {"id": "ct5", "nome": "Plano de Adaptação a Mudanças (Pivot)"}, {"id": "ct6", "nome": "Análise das 5 Forças de Porter"}, {"id": "ct7", "nome": "Criação de um Plano de Expansão"}, {"id": "ct8", "nome": "Estudo de Barreiras de Entrada no Mercado"}, {"id": "ct9", "nome": "Registro de Propriedade Intelectual (Marca)"}, {"id": "ct10", "nome": "Simulação de Cenários de Crise"}],
     "recursos": [{"id": "re1", "nome": "Estimativa de Custos e Despesas"}, {"id": "re2", "nome": "Mapa de Parceiros Estratégicos"}, {"id": "re3", "nome": "Elaboração do Canvas de Modelo de Negócio"}, {"id": "re4", "nome": "Projeção de Fluxo de Caixa (12 meses)"}, {"id": "re5", "nome": "Pitch para Investidores"}, {"id": "re6", "nome": "Análise de Fontes de Financiamento"}, {"id": "re7", "nome": "Definição de Métricas Chave (KPIs)"}, {"id": "re8", "nome": "Estruturação Jurídica da Empresa"}, {"id": "re9", "nome": "Otimização de Processos (Redução de Custos)"}, {"id": "re10", "nome": "Seleção de Ferramentas e Tecnologias (Stack)"}]
 }
 
@@ -63,7 +63,6 @@ class Jogador:
         self.nome = nome
         self.classe = classe
         self.dimensao_afinidade = self.definir_afinidade()
-        # ATUALIZAÇÃO: Adicionada a descrição da classe
         self.descricao = self.definir_descricao()
 
     def get_info(self):
@@ -79,7 +78,6 @@ class Jogador:
                       "Estrategista": "competitividade", "Guardião": "recursos"}
         return afinidades.get(self.classe)
 
-    # ATUALIZAÇÃO: Nova função para obter a descrição detalhada da classe
     def definir_descricao(self):
         descricoes = {
             "Líder": "Possuem um talento especial para manter equipes motivadas e produtivas. Sua liderança promove a harmonia, a colaboração e contribui para o desenvolvimento pessoal dos colaboradores.",
@@ -89,8 +87,6 @@ class Jogador:
             "Guardião": "Se distinguem por sua excepcional capacidade de raciocínio lógico. São especialistas em otimizar o uso de recursos e excelentes na construção de argumentos para captar investimentos."
         }
         return descricoes.get(self.classe, "Classe desconhecida.")
-
-# (O restante do código, com as classes Startup e Jogo, permanece o mesmo da versão anterior)
 
 
 class Startup:
@@ -102,15 +98,41 @@ class Startup:
                           "mercado": 1, "competitividade": 1, "recursos": 1}
         self.nivel = 1
         self.acoes_realizadas = []
+        # ATUALIZAÇÃO: Adiciona o estado de eliminação
+        self.esta_eliminada = False
 
     def get_status(self):
-        return {"nome": self.nome, "ideia_negocio": self.ideia_negocio, "nivel": self.nivel, "dimensoes": self.dimensoes, "jogadores": [j.get_info() for j in self.jogadores], "acoes_realizadas": self.acoes_realizadas}
+        return {
+            "nome": self.nome, 
+            "ideia_negocio": self.ideia_negocio, 
+            "nivel": self.nivel, 
+            "dimensoes": self.dimensoes, 
+            "jogadores": [j.get_info() for j in self.jogadores], 
+            "acoes_realizadas": self.acoes_realizadas,
+            # ATUALIZAÇÃO: Envia o status de eliminação para o frontend
+            "esta_eliminada": self.esta_eliminada
+        }
+
+    # ATUALIZAÇÃO: Nova função para eliminar a startup
+    def eliminar_startup(self):
+        self.esta_eliminada = True
+        self.nivel = 0
+        # Zera todas as dimensões para o gráfico "morrer"
+        self.dimensoes = {dim: 0 for dim in self.dimensoes}
 
     def aplicar_ponto(self, dimensao, pontos=1):
-        if dimensao in self.dimensoes:
+        if dimensao in self.dimensoes and not self.esta_eliminada:
             self.dimensoes[dimensao] += pontos
+            
+            # ATUALIZAÇÃO: Verifica se a dimensão chegou a 0 ou menos
+            if self.dimensoes[dimensao] <= 0:
+                self.eliminar_startup()
 
     def checar_evolucao_nivel(self):
+        # ATUALIZAÇÃO: Startups eliminadas não podem subir de nível
+        if self.esta_eliminada:
+            return False
+            
         pontuacoes = list(self.dimensoes.values())
         if all(score == pontuacoes[0] for score in pontuacoes) and pontuacoes[0] > self.nivel:
             self.nivel = pontuacoes[0]
@@ -125,6 +147,8 @@ class Jogo:
         self.baralho = []
         self.descarte = []
         self.reiniciar_baralho()
+        self.jogo_terminado = False
+        self.vencedor = None
 
     def reiniciar_baralho(self):
         cartas_para_embaralhar = self.descarte if self.descarte else BARALHO_DE_EVENTOS.copy()
@@ -141,6 +165,9 @@ class Jogo:
 
     def iniciar_jogo(self, dados_equipes):
         self.startups = []
+        self.jogo_terminado = False
+        self.vencedor = None
+        
         for equipe in dados_equipes:
             nome_startup = equipe.get("nome_startup")
             ideia_negocio = equipe.get("ideia_negocio", "Não definida")
@@ -155,9 +182,18 @@ class Jogo:
         return next((s for s in self.startups if s.nome == name), None)
 
     def apresentar_acao(self, startup_id, jogador_nome, acao_id, tipo_acao):
+        
+        if self.jogo_terminado:
+            return {"status": "erro", "mensagem": f"O jogo já terminou! {self.vencedor.nome} venceu."}
+
         startup = self.get_startup_by_name(startup_id)
         if not startup:
             return {"status": "erro", "mensagem": "Startup não encontrada."}
+            
+        # ATUALIZAÇÃO: Impede que startups eliminadas joguem
+        if startup.esta_eliminada:
+            return {"status": "erro", "mensagem": f"A startup {startup.nome} foi eliminada e não pode mais jogar."}
+
         dimensao_acao, acao_obj = None, None
         for dim, acoes in self.acoes.items():
             for acao in acoes:
@@ -166,8 +202,10 @@ class Jogo:
                     break
             if dimensao_acao:
                 break
+
         if not dimensao_acao:
             return {"status": "erro", "mensagem": "Ação não encontrada."}
+
         if tipo_acao == 'individual':
             jogador = next(
                 (j for j in startup.jogadores if j.nome == jogador_nome), None)
@@ -175,18 +213,45 @@ class Jogo:
                 return {"status": "erro", "mensagem": "Jogador não encontrado."}
             if jogador.dimensao_afinidade != dimensao_acao:
                 return {"status": "falha", "mensagem": f"Ação inválida. A dimensão '{dimensao_acao}' não é a de afinidade do jogador {jogador.nome} ({jogador.dimensao_afinidade})."}
+
         startup.aplicar_ponto(dimensao_acao)
         if acao_obj['nome'] not in startup.acoes_realizadas:
             startup.acoes_realizadas.append(acao_obj['nome'])
+
         subiu_de_nivel = startup.checar_evolucao_nivel()
         evento_sorteado = self.disparar_evento(
             startup) if subiu_de_nivel else None
-        return {"status": "sucesso", "mensagem": f"Ação '{acao_obj['nome']}' apresentada! +1 ponto em '{dimensao_acao}'.", "subiu_de_nivel": subiu_de_nivel, "evento": evento_sorteado}
+
+        # --- ATUALIZAÇÃO: Novas condições de vitória ---
+        
+        # 1. Verifica se só restou uma startup (vitória por sobrevivência)
+        # (Isso é checado após o evento, pois o evento pode ter eliminado alguém)
+        startups_ativas = [s for s in self.startups if not s.esta_eliminada]
+        if len(startups_ativas) == 1 and not self.jogo_terminado:
+            self.jogo_terminado = True
+            self.vencedor = startups_ativas[0]
+            evento_sorteado = None # Anula o evento se a vitória for por eliminação
+
+        # 2. Verifica a vitória por Nível 5 (vitória por corrida)
+        if subiu_de_nivel and startup.nivel == 5 and not self.jogo_terminado:
+            self.jogo_terminado = True
+            self.vencedor = startup
+            evento_sorteado = None 
+
+        return {
+            "status": "sucesso", 
+            "mensagem": f"Ação '{acao_obj['nome']}' apresentada! +1 ponto em '{dimensao_acao}'.", 
+            "subiu_de_nivel": subiu_de_nivel, 
+            "evento": evento_sorteado,
+            "jogo_terminado": self.jogo_terminado,
+            "vencedor": self.vencedor.nome if self.vencedor else None
+        }
 
     def disparar_evento(self, startup, manual=False):
         evento = self.comprar_carta()
         evento_resultado = evento.copy()
         evento_resultado["mensagem_final"] = f"Evento: {evento['nome']} - {evento['descricao']}"
+
         if evento['tipo'] == 'negativo':
             anulado = False
             if any(j.classe == evento['anulavel_por']['classe'] for j in startup.jogadores):
@@ -197,14 +262,24 @@ class Jogo:
                 anulado = True
                 evento_resultado[
                     "mensagem_final"] += f"\nEfeito NEGADO pela realização da ação '{evento['anulavel_por']['acao']}'!"
+
             if not anulado:
                 for dimensao, valor in evento['efeito'].items():
+                    # ATUALIZAÇÃO: aplicar_ponto agora pode eliminar a startup
                     startup.aplicar_ponto(dimensao, valor)
-                evento_resultado["mensagem_final"] += f"\nEfeito aplicado: {list(evento['efeito'].keys())[0]} perdeu {abs(sum(evento['efeito'].values()))} ponto(s)."
+                
+                # ATUALIZAÇÃO: Adiciona uma mensagem se a startup foi eliminada
+                if startup.esta_eliminada:
+                    evento_resultado["mensagem_final"] += f"\nDesastre! A startup {startup.nome} não resistiu ao impacto e foi ELIMINADA!"
+                else:
+                    evento_resultado["mensagem_final"] += f"\nEfeito aplicado: {list(evento['efeito'].keys())[0]} perdeu {abs(sum(evento['efeito'].values()))} ponto(s)."
+            
             evento_resultado['anulado'] = anulado
+
         elif evento['tipo'] == 'positivo':
             condicao_atendida = any(j.classe == evento['condicao']['classe']
                                     for j in startup.jogadores) or evento['condicao']['acao'] in startup.acoes_realizadas
+
             if condicao_atendida:
                 for dimensao, valor in evento['efeito'].items():
                     startup.aplicar_ponto(dimensao, valor)
@@ -213,4 +288,5 @@ class Jogo:
             else:
                 evento_resultado["mensagem_final"] += "\nA equipe não cumpriu os requisitos para se beneficiar deste evento."
             evento_resultado['bonus_ativado'] = condicao_atendida
+
         return evento_resultado
