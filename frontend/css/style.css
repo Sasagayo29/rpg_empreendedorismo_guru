@@ -102,12 +102,11 @@ h4 {
 #home-screen,
 #game-setup,
 .startup-card,
-#actions-container,
-#log,
 #game-header,
 .fim-de-jogo-content,
 .biblioteca-content,
-.modal-content {
+.modal-content,
+.validacao-content {
     background: var(--bg-panel);
     border: 1px solid var(--border-color-strong);
     padding: 1.5rem;
@@ -288,24 +287,77 @@ h4 {
     background: none;
     padding: 0;
     border-radius: 0;
-    color: var(--text-link); /* Nome da startup em azul */
+    color: var(--cor-estrategista); /* Laranja para a Fase */
+    font-weight: bold;
 }
-#startup-cards-container {
+
+/* =========================================================
+ INÍCIO DA CORREÇÃO DE LAYOUT DO MESTRE
+=========================================================
+*/
+
+/* 1. Wrapper da Coluna Esquerda (Cards + Botões) */
+#main-content-wrapper {
     grid-area: cards;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Contêiner dos Cards (dentro do wrapper) */
+#startup-cards-container {
+    /* Não é mais um item de grid */
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
 }
+
+/* 3. Contêiner dos Botões (dentro do wrapper) */
+.turn-controls-container {
+    /* Remove todas as propriedades de grid problemáticas */
+    /* grid-area: cards; <-- REMOVIDO */
+    /* grid-column: 1 / 2; <-- REMOVIDO */
+    
+    text-align: center;
+    border-top: 1px solid var(--border-color-soft);
+    padding-top: 1rem;
+    margin: 1rem 0;
+    width: 100%; /* Garante que ocupe a largura da coluna */
+}
+
+/* 4. Sidebar (Contêiner da Coluna Direita) */
 #controls-and-log {
     grid-area: sidebar;
-    position: sticky;
-    top: 20px;
-}
-.turn-controls-container {
+    position: relative; 
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    max-height: 85vh; /* Altura máxima para a sidebar inteira */
+}
+
+/* =========================================================
+ FIM DA CORREÇÃO DE LAYOUT DO MESTRE
+=========================================================
+*/
+
+
+/* Botões de Fase do Mestre */
+.button-fase {
+    background-color: var(--cor-estrategista); /* Laranja */
+}
+.button-fase:hover:not(:disabled) {
+    background-color: #d97706;
+    box-shadow: 0 0 10px rgba(var(--cor-estrategista-rgb), 0.5);
+}
+.button-resolver {
+    background-color: var(--cor-guardiao); /* Verde */
+}
+.button-resolver:hover:not(:disabled) {
+    background-color: #059669;
+    box-shadow: 0 0 10px rgba(var(--cor-guardiao-rgb), 0.5);
 }
 
 /* --- COMPONENTES DOS CARDS --- */
@@ -315,7 +367,6 @@ h4 {
 }
 .startup-card.active-turn {
     border-color: var(--cor-lider);
-    /* Sombra de brilho para o turno ativo */
     box-shadow: 0 0 15px 3px rgba(var(--cor-lider-rgb), 0.6);
     transform: translateY(-5px);
 }
@@ -327,7 +378,7 @@ h4 {
     width: 100%;
     max-width: 300px;
     margin: 15px auto;
-    height: 250px; /* Altura fixa para o gráfico */
+    height: 250px;
 }
 .player-name {
     cursor: pointer;
@@ -367,40 +418,95 @@ h4 {
     transform: none;
 }
 
-/* --- PAINEL DE CONTROLES (DIREITA) --- */
-#actions-container {
+/* --- PAINEL DE CONTROLES (LAYOUT DE ABAS DA SIDEBAR) --- */
+
+/* 1. Barra de Abas */
+.sidebar-tabs {
+    display: flex;
+    flex-shrink: 0;
+    background: var(--bg-panel-darker);
     border-radius: 12px 12px 0 0;
+    padding: 5px 5px 0 5px;
+    border: 1px solid var(--border-color-strong);
+    border-bottom: none;
 }
-#player-turn-selector {
-    text-align: center;
-}
-#player-turn-selector button {
-    background-color: var(--bg-panel-lightest);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color-soft);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+
+.sidebar-tab-btn {
+    flex-grow: 1;
+    padding: 0.75rem 0.5rem;
+    margin: 0;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border-radius: 8px 8px 0 0;
     cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
     transition: all 0.2s ease;
 }
-#player-turn-selector button:hover:not(:disabled) {
-    background-color: var(--border-color-soft);
-    border-color: var(--cor-lider);
-    box-shadow: 0 0 5px rgba(var(--cor-lider-rgb), 0.3);
+
+.sidebar-tab-btn:hover {
+    background-color: var(--bg-panel-lightest);
+    color: var(--text-primary);
+    box-shadow: none;
 }
-#player-turn-selector button:disabled {
+
+.sidebar-tab-btn.active {
+    color: var(--text-link);
     background-color: var(--bg-panel);
-    color: var(--text-secondary);
-    border-color: var(--bg-panel-lightest);
-    cursor: not-allowed;
-    opacity: 0.7;
+    border-bottom-color: var(--cor-lider);
 }
+
+/* 2. Contêiner de Conteúdo das Abas */
+.sidebar-content {
+    flex-grow: 1;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color-strong);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    padding: 0;
+    overflow-y: hidden; /* O scroll será por painel */
+    position: relative;
+}
+
+/* 3. Painéis Individuais (Ações, Fila, Log) */
+.sidebar-panel {
+    display: none; /* Esconde todos por padrão */
+    padding: 1rem;
+    animation: fadeIn 0.3s ease-out;
+    overflow-y: auto;
+    height: 100%;
+    /* Altura calculada para scroll interno */
+    max-height: calc(85vh - 100px); 
+    box-sizing: border-box;
+}
+
+.sidebar-panel.active {
+    display: block; /* Mostra apenas o ativo */
+}
+
+/* 4. Reseta estilos antigos que agora estão dentro dos painéis */
+#actions-container,
+#log,
+#validacao-fila-container {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    background: transparent;
+    height: 100%;
+}
+
+/* 5. Filtros de Dimensão (dentro do painel 'Ações') */
 #dimensao-filtros {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    margin: 1rem 0;
+    margin: 0 0 1rem 0; /* Ajusta margem */
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-color-soft);
 }
@@ -424,14 +530,102 @@ h4 {
     color: #fff;
     border-color: var(--cor-filtro);
 }
-#acoes-disponiveis {
-    max-height: 350px;
+
+/* 6. Scroll de Listas (Ações, Fila, Log) */
+#acoes-disponiveis,
+#log-list,
+#validacao-fila-list {
+    /* Altura máx de scroll calculada para caber no painel */
+    max-height: calc(85vh - 250px); 
     overflow-y: auto;
     border: 1px solid var(--border-color-soft);
-    padding: 10px;
-    margin-top: 10px;
     border-radius: 6px;
 }
+
+#acoes-disponiveis {
+    padding: 10px;
+    margin: 0; /* Remove a margem superior antiga */
+}
+
+/* 7. Estilos da Fila de Validação (dentro do painel 'Fila') */
+#fila-panel {
+    padding: 1rem;
+}
+#validacao-fila-list {
+    padding: 0;
+    border: none;
+    margin: 0;
+    max-height: calc(85vh - 150px); /* Mais altura, pois está sozinha na aba */
+}
+.fila-item {
+    background: var(--bg-panel-lightest);
+    border: 1px solid var(--border-color-soft);
+    color: var(--text-primary);
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+.fila-item:hover {
+    border-color: var(--cor-lider);
+    background-color: var(--bg-panel-lightest);
+    box-shadow: 0 0 8px rgba(var(--cor-lider-rgb), 0.7);
+}
+.fila-item strong {
+    color: var(--text-link);
+    display: block;
+}
+.fila-item .tipo-acao {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+.fila-item-vazia {
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* 8. Estilos do Log (dentro do painel 'Log') */
+#log-panel {
+    padding: 1rem;
+}
+#log-list {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: var(--bg-panel-darker);
+    border-radius: 6px;
+    max-height: calc(85vh - 150px); /* Mais altura, pois está sozinha na aba */
+}
+#log-list li {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border-color-soft);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    font-weight: 500;
+}
+#log-list li:last-child {
+    border-bottom: none;
+}
+.log-normal { color: var(--text-secondary); }
+.log-normal::before { content: "[+] "; color: var(--text-secondary); }
+.log-info { color: var(--cor-lider); font-weight: bold; }
+.log-info::before { content: "★ "; color: var(--cor-lider); }
+.log-sucesso { color: var(--cor-guardiao); }
+.log-sucesso::before { content: "👍 "; color: var(--cor-guardiao); }
+.log-aviso { color: var(--cor-estrategista); }
+.log-aviso::before { content: "⚠️ "; color: var(--cor-estrategista); }
+.log-perigo { color: var(--cor-desbravador); font-weight: bold; background-color: rgba(var(--cor-desbravador-rgb), 0.05); }
+.log-perigo::before { content: "☠️ "; color: var(--cor-desbravador); }
+
+
+/* --- BOTÕES DE AÇÃO (DENTRO DA ABA 'AÇÕES') --- */
 .acao-button {
     display: block;
     width: 100%;
@@ -441,32 +635,17 @@ h4 {
     background-color: var(--bg-panel-lightest);
     border: 1px solid var(--border-color-soft);
     color: var(--text-primary);
-    transition: all 0.2s ease; /* Transição para hover */
+    transition: all 0.2s ease;
 }
 .acao-button:hover:not(:disabled) {
     background-color: var(--border-color-soft);
 }
 /* Brilho dos botões de ação */
-.acao-equipe:hover:not(:disabled) {
-    border-color: var(--cor-lider);
-    box-shadow: 0 0 8px rgba(var(--cor-lider-rgb), 0.7);
-}
-.acao-produto:hover:not(:disabled) {
-    border-color: var(--cor-visionario);
-    box-shadow: 0 0 8px rgba(var(--cor-visionario-rgb), 0.7);
-}
-.acao-mercado:hover:not(:disabled) {
-    border-color: var(--cor-desbravador);
-    box-shadow: 0 0 8px rgba(var(--cor-desbravador-rgb), 0.7);
-}
-.acao-competitividade:hover:not(:disabled) {
-    border-color: var(--cor-estrategista);
-    box-shadow: 0 0 8px rgba(var(--cor-estrategista-rgb), 0.7);
-}
-.acao-recursos:hover:not(:disabled) {
-    border-color: var(--cor-guardiao);
-    box-shadow: 0 0 8px rgba(var(--cor-guardiao-rgb), 0.7);
-}
+.acao-equipe:hover:not(:disabled) { border-color: var(--cor-lider); box-shadow: 0 0 8px rgba(var(--cor-lider-rgb), 0.7); }
+.acao-produto:hover:not(:disabled) { border-color: var(--cor-visionario); box-shadow: 0 0 8px rgba(var(--cor-visionario-rgb), 0.7); }
+.acao-mercado:hover:not(:disabled) { border-color: var(--cor-desbravador); box-shadow: 0 0 8px rgba(var(--cor-desbravador-rgb), 0.7); }
+.acao-competitividade:hover:not(:disabled) { border-color: var(--cor-estrategista); box-shadow: 0 0 8px rgba(var(--cor-estrategista-rgb), 0.7); }
+.acao-recursos:hover:not(:disabled) { border-color: var(--cor-guardiao); box-shadow: 0 0 8px rgba(var(--cor-guardiao-rgb), 0.7); }
 
 /* --- ESTILOS DE ESTADO DOS BOTÕES DE AÇÃO --- */
 .acao-button.acao-realizada {
@@ -506,68 +685,6 @@ h4 {
     to {
         box-shadow: 0 0 12px 4px rgba(var(--glow-color-rgb), 0.8);
     }
-}
-
-/* --- LOG DE EVENTOS --- */
-#log {
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: var(--bg-panel-darker);
-    border-radius: 0 0 12px 12px;
-    border-top: 1px dashed rgba(var(--cor-lider-rgb), 0.2);
-}
-#log-list {
-    list-style: none;
-    padding: 0;
-}
-#log-list li {
-    padding: 0.6rem 0.75rem;
-    border-bottom: 1px solid var(--border-color-soft);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    word-wrap: break-word;
-    font-weight: 500;
-}
-#log-list li:first-child {
-    font-weight: 500;
-}
-.log-normal {
-    color: var(--text-secondary);
-}
-.log-normal::before {
-    content: "[+] ";
-    color: var(--text-secondary);
-}
-.log-info {
-    color: var(--cor-lider);
-    font-weight: bold;
-}
-.log-info::before {
-    content: "★ ";
-    color: var(--cor-lider);
-}
-.log-sucesso {
-    color: var(--cor-guardiao);
-}
-.log-sucesso::before {
-    content: "👍 ";
-    color: var(--cor-guardiao);
-}
-.log-aviso {
-    color: var(--cor-estrategista);
-}
-.log-aviso::before {
-    content: "⚠️ ";
-    color: var(--cor-estrategista);
-}
-.log-perigo {
-    color: var(--cor-desbravador);
-    font-weight: bold;
-    background-color: rgba(var(--cor-desbravador-rgb), 0.05);
-}
-.log-perigo::before {
-    content: "☠️ ";
-    color: var(--cor-desbravador);
 }
 
 /* --- HUD DO JOGADOR --- */
@@ -657,7 +774,6 @@ h4 {
     transform: rotateY(180deg);
 }
 
-/* CORREÇÃO AQUI: Fundo do Flashcard agora usa variável */
 .flashcard .front,
 .flashcard .back {
     position: absolute;
@@ -673,7 +789,7 @@ h4 {
     box-sizing: border-box;
     text-align: center;
     border-top: 8px solid;
-    background: var(--bg-panel-darker); /* USA VARIÁVEL */
+    background: var(--bg-panel-darker);
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -696,24 +812,13 @@ h4 {
     font-size: 1.1rem;
     margin-top: 15px;
 }
-.evento-positivo {
-    border-color: var(--cor-guardiao);
-}
-.evento-positivo .evento-resultado-texto {
-    color: var(--cor-guardiao);
-}
-.evento-negativo {
-    border-color: var(--cor-vermelho-negativo);
-}
-.evento-negativo .evento-resultado-texto {
-    color: var(--cor-vermelho-negativo);
-}
-.evento-anulado {
-    border-color: var(--cor-lider);
-}
-.evento-anulado .evento-resultado-texto {
-    color: var(--cor-lider);
-}
+.evento-positivo { border-color: var(--cor-guardiao); }
+.evento-positivo .evento-resultado-texto { color: var(--cor-guardiao); }
+.evento-negativo { border-color: var(--cor-vermelho-negativo); }
+.evento-negativo .evento-resultado-texto { color: var(--cor-vermelho-negativo); }
+.evento-anulado { border-color: var(--cor-lider); }
+.evento-anulado .evento-resultado-texto { color: var(--cor-lider); }
+
 .fim-de-jogo-content {
     text-align: center;
     max-width: 500px;
@@ -744,14 +849,12 @@ h4 {
 #jogar-novamente-btn:hover {
     background-color: #059669;
 }
-
 .biblioteca-content {
     width: 90%;
     max-width: 1200px;
     text-align: center;
     border-top: 10px solid var(--text-link);
     animation: fadeInScale 0.5s ease-out;
-    /* CORREÇÃO: Adiciona max-height e overflow */
     max-height: 85vh;
     overflow-y: auto;
 }
@@ -761,7 +864,7 @@ h4 {
     justify-content: center;
     gap: 20px;
     margin: 2rem 0;
-    padding-right: 10px; /* Espaço para a barra de scroll */
+    padding-right: 10px;
 }
 .biblioteca-card {
     flex-basis: 300px;
@@ -797,6 +900,76 @@ h4 {
 }
 #fechar-biblioteca-btn:hover {
     background-color: #475569;
+}
+
+/* --- MODAL DE VALIDAÇÃO (MESTRE) --- */
+.validacao-content {
+    width: 90%;
+    max-width: 500px;
+    border-top: 10px solid var(--cor-guardiao); /* Borda verde */
+    animation: fadeInScale 0.5s ease-out;
+}
+.validacao-content h2 {
+    margin-top: 0;
+    color: var(--cor-guardiao); /* Título verde */
+}
+.validacao-content h3 {
+    text-align: left;
+    color: var(--text-primary);
+}
+.validacao-content h4 {
+    text-align: left;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+.validacao-content h3 span,
+.validacao-content h4 span {
+    color: var(--text-link); /* Cor de destaque azul */
+    font-weight: bold;
+}
+.validacao-content p {
+    text-align: left;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+#validacao-justificativa {
+    background: var(--bg-panel-darker);
+    border-left: 5px solid var(--cor-estrategista); /* Laranja */
+    padding: 1rem;
+    border-radius: 4px;
+    font-style: italic;
+    color: var(--text-primary);
+    margin: 0;
+    /* Adiciona scroll se a justificativa for longa */
+    max-height: 150px;
+    overflow-y: auto;
+}
+.validacao-botoes {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color-soft);
+    padding-top: 1.5rem;
+}
+.validacao-botoes button {
+    flex-grow: 1;
+    font-size: 1.1rem;
+}
+.button-aprovar {
+    background-color: var(--cor-guardiao);
+}
+.button-aprovar:hover:not(:disabled) {
+    background-color: #059669;
+    box-shadow: 0 0 10px rgba(var(--cor-guardiao-rgb), 0.5);
+}
+.button-recusar {
+    background-color: var(--cor-desbravador);
+}
+.button-recusar:hover:not(:disabled) {
+    background-color: #c91c28;
+    box-shadow: 0 0 10px rgba(var(--cor-desbravador-rgb), 0.5);
 }
 
 /* --- ESTILOS GENÉRICOS DE BOTÕES E FORMULÁRIOS --- */
@@ -848,7 +1021,6 @@ button:disabled {
     color: var(--text-primary);
     border: 1px solid var(--border-color-soft);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    /* Correção para dropdowns */
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
@@ -876,139 +1048,49 @@ legend {
 
 /* --- CORES DE CLASSE E AFINIDADE (AGRUPADAS) --- */
 /* Líder (Azul) */
-.classe-lider {
-    border-color: var(--cor-lider);
-}
-.classe-lider h3,
-.classe-lider .back {
-    color: var(--cor-lider);
-}
-.classe-lider .biblioteca-img {
-    border-color: var(--cor-lider);
-    box-shadow: 0 0 15px rgba(var(--cor-lider-rgb), 0.6);
-}
-.highlighted-by-affinity.classe-lider {
-    --glow-color-rgb: var(--cor-lider-rgb);
-}
-#player-hud.classe-lider {
-    border-top-color: var(--cor-lider);
-}
-#player-hud.classe-lider .hud-info h4 {
-    color: var(--cor-lider);
-}
-.filtro-equipe {
-    --cor-filtro: var(--cor-lider);
-    border-color: var(--cor-lider);
-    color: var(--cor-lider);
-}
+.classe-lider { border-color: var(--cor-lider); }
+.classe-lider h3, .classe-lider .back { color: var(--cor-lider); }
+.classe-lider .biblioteca-img { border-color: var(--cor-lider); box-shadow: 0 0 15px rgba(var(--cor-lider-rgb), 0.6); }
+.highlighted-by-affinity.classe-lider { --glow-color-rgb: var(--cor-lider-rgb); }
+#player-hud.classe-lider { border-top-color: var(--cor-lider); }
+#player-hud.classe-lider .hud-info h4 { color: var(--cor-lider); }
+.filtro-equipe { --cor-filtro: var(--cor-lider); border-color: var(--cor-lider); color: var(--cor-lider); }
 
 /* Visionário (Roxo) */
-.classe-visionario {
-    border-color: var(--cor-visionario);
-}
-.classe-visionario h3,
-.classe-visionario .back {
-    color: var(--cor-visionario);
-}
-.classe-visionario .biblioteca-img {
-    border-color: var(--cor-visionario);
-    box-shadow: 0 0 15px rgba(var(--cor-visionario-rgb), 0.6);
-}
-.highlighted-by-affinity.classe-visionario {
-    --glow-color-rgb: var(--cor-visionario-rgb);
-}
-#player-hud.classe-visionario {
-    border-top-color: var(--cor-visionario);
-}
-#player-hud.classe-visionario .hud-info h4 {
-    color: var(--cor-visionario);
-}
-.filtro-produto {
-    --cor-filtro: var(--cor-visionario);
-    border-color: var(--cor-visionario);
-    color: var(--cor-visionario);
-}
+.classe-visionario { border-color: var(--cor-visionario); }
+.classe-visionario h3, .classe-visionario .back { color: var(--cor-visionario); }
+.classe-visionario .biblioteca-img { border-color: var(--cor-visionario); box-shadow: 0 0 15px rgba(var(--cor-visionario-rgb), 0.6); }
+.highlighted-by-affinity.classe-visionario { --glow-color-rgb: var(--cor-visionario-rgb); }
+#player-hud.classe-visionario { border-top-color: var(--cor-visionario); }
+#player-hud.classe-visionario .hud-info h4 { color: var(--cor-visionario); }
+.filtro-produto { --cor-filtro: var(--cor-visionario); border-color: var(--cor-visionario); color: var(--cor-visionario); }
 
 /* Desbravador (Vermelho) */
-.classe-desbravador {
-    border-color: var(--cor-desbravador);
-}
-.classe-desbravador h3,
-.classe-desbravador .back {
-    color: var(--cor-desbravador);
-}
-.classe-desbravador .biblioteca-img {
-    border-color: var(--cor-desbravador);
-    box-shadow: 0 0 15px rgba(var(--cor-desbravador-rgb), 0.6);
-}
-.highlighted-by-affinity.classe-desbravador {
-    --glow-color-rgb: var(--cor-desbravador-rgb);
-}
-#player-hud.classe-desbravador {
-    border-top-color: var(--cor-desbravador);
-}
-#player-hud.classe-desbravador .hud-info h4 {
-    color: var(--cor-desbravador);
-}
-.filtro-mercado {
-    --cor-filtro: var(--cor-desbravador);
-    border-color: var(--cor-desbravador);
-    color: var(--cor-desbravador);
-}
+.classe-desbravador { border-color: var(--cor-desbravador); }
+.classe-desbravador h3, .classe-desbravador .back { color: var(--cor-desbravador); }
+.classe-desbravador .biblioteca-img { border-color: var(--cor-desbravador); box-shadow: 0 0 15px rgba(var(--cor-desbravador-rgb), 0.6); }
+.highlighted-by-affinity.classe-desbravador { --glow-color-rgb: var(--cor-desbravador-rgb); }
+#player-hud.classe-desbravador { border-top-color: var(--cor-desbravador); }
+#player-hud.classe-desbravador .hud-info h4 { color: var(--cor-desbravador); }
+.filtro-mercado { --cor-filtro: var(--cor-desbravador); border-color: var(--cor-desbravador); color: var(--cor-desbravador); }
 
 /* Estrategista (Laranja) */
-.classe-estrategista {
-    border-color: var(--cor-estrategista);
-}
-.classe-estrategista h3,
-.classe-estrategista .back {
-    color: var(--cor-estrategista);
-}
-.classe-estrategista .biblioteca-img {
-    border-color: var(--cor-estrategista);
-    box-shadow: 0 0 15px rgba(var(--cor-estrategista-rgb), 0.6);
-}
-.highlighted-by-affinity.classe-estrategista {
-    --glow-color-rgb: var(--cor-estrategista-rgb);
-}
-#player-hud.classe-estrategista {
-    border-top-color: var(--cor-estrategista);
-}
-#player-hud.classe-estrategista .hud-info h4 {
-    color: var(--cor-estrategista);
-}
-.filtro-competitividade {
-    --cor-filtro: var(--cor-estrategista);
-    border-color: var(--cor-estrategista);
-    color: var(--cor-estrategista);
-}
+.classe-estrategista { border-color: var(--cor-estrategista); }
+.classe-estrategista h3, .classe-estrategista .back { color: var(--cor-estrategista); }
+.classe-estrategista .biblioteca-img { border-color: var(--cor-estrategista); box-shadow: 0 0 15px rgba(var(--cor-estrategista-rgb), 0.6); }
+.highlighted-by-affinity.classe-estrategista { --glow-color-rgb: var(--cor-estrategista-rgb); }
+#player-hud.classe-estrategista { border-top-color: var(--cor-estrategista); }
+#player-hud.classe-estrategista .hud-info h4 { color: var(--cor-estrategista); }
+.filtro-competitividade { --cor-filtro: var(--cor-estrategista); border-color: var(--cor-estrategista); color: var(--cor-estrategista); }
 
 /* Guardião (Verde) */
-.classe-guardiao {
-    border-color: var(--cor-guardiao);
-}
-.classe-guardiao h3,
-.classe-guardiao .back {
-    color: var(--cor-guardiao);
-}
-.classe-guardiao .biblioteca-img {
-    border-color: var(--cor-guardiao);
-    box-shadow: 0 0 15px rgba(var(--cor-guardiao-rgb), 0.6);
-}
-.highlighted-by-affinity.classe-guardiao {
-    --glow-color-rgb: var(--cor-guardiao-rgb);
-}
-#player-hud.classe-guardiao {
-    border-top-color: var(--cor-guardiao);
-}
-#player-hud.classe-guardiao .hud-info h4 {
-    color: var(--cor-guardiao);
-}
-.filtro-recursos {
-    --cor-filtro: var(--cor-guardiao);
-    border-color: var(--cor-guardiao);
-    color: var(--cor-guardiao);
-}
+.classe-guardiao { border-color: var(--cor-guardiao); }
+.classe-guardiao h3, .classe-guardiao .back { color: var(--cor-guardiao); }
+.classe-guardiao .biblioteca-img { border-color: var(--cor-guardiao); box-shadow: 0 0 15px rgba(var(--cor-guardiao-rgb), 0.6); }
+.highlighted-by-affinity.classe-guardiao { --glow-color-rgb: var(--cor-guardiao-rgb); }
+#player-hud.classe-guardiao { border-top-color: var(--cor-guardiao); }
+#player-hud.classe-guardiao .hud-info h4 { color: var(--cor-guardiao); }
+.filtro-recursos { --cor-filtro: var(--cor-guardiao); border-color: var(--cor-guardiao); color: var(--cor-guardiao); }
 
 /* Outros */
 .filtro-todos {
@@ -1019,22 +1101,201 @@ legend {
 
 /* --- ANIMAÇÕES --- */
 @keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- FEEDBACK DE STATUS NO CARD (CORREÇÃO) --- */
+.status-aprovado {
+    color: var(--cor-guardiao); /* Verde */
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.status-pendente {
+    color: var(--cor-estrategista); /* Laranja */
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* --- ADIÇÃO: MELHORIA DE ESTILOS DO LOBBY --- */
+.status-lobby {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--cor-estrategista); /* Laranja */
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: rgba(var(--cor-estrategista-rgb), 0.1);
+    border: 1px dashed rgba(var(--cor-estrategista-rgb), 0.5);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.status-lobby.connected {
+    color: var(--cor-guardiao); /* Verde */
+    background: rgba(var(--cor-guardiao-rgb), 0.1);
+    border-style: solid;
+    border-color: rgba(var(--cor-guardiao-rgb), 0.5);
+    font-style: normal;
+}
+
+/* --- ADIÇÃO: MELHORIA FEEDBACK DE OPONENTES --- */
+
+/* Ajusta o contêiner de cards do jogador para se parecer com o do mestre */
+#game-board.jogador-board #startup-card-display {
+    grid-area: cards;
+    overflow-y: auto; /* Adiciona scroll se os cards não couberem */
+    max-height: 85vh;
+}
+
+#game-board.jogador-board #startup-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding-bottom: 2rem; /* Espaço para o fim da página */
+}
+
+/* Estilo para o card do jogador */
+.startup-card.meu-card {
+    border-color: var(--cor-lider);
+    box-shadow: 0 0 15px 3px rgba(var(--cor-lider-rgb), 0.6);
+    transform: translateY(-5px);
+}
+
+/* Estilo para os cards dos oponentes */
+.startup-card.card-oponente {
+    opacity: 0.8;
+    border-color: var(--border-color-soft);
+}
+
+/* Contêiner para o status (para garantir alinhamento) */
+.status-container {
+    min-height: 1.2em; /* Reserva espaço para o status */
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* Novo status-info (para fase de resolução) */
+.status-info {
+    color: var(--cor-cinza);
+    font-style: italic;
+}
+
+/* --- ADIÇÃO: CORREÇÃO DE LAYOUT DO DASHBOARD DO JOGADOR --- */
+
+/* 1. Define o layout da grade para o tabuleiro do jogador */
+#game-board.jogador-board {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "header header"
+        "cards sidebar";
+    gap: 20px;
+}
+
+/* 2. Coloca o contêiner dos cards na área 'cards' */
+#game-board.jogador-board #startup-card-display {
+    grid-area: cards;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+/* 3. Coloca a sidebar de controles do jogador na área 'sidebar' */
+#game-board.jogador-board #jogador-controles {
+    grid-area: sidebar;
+    position: sticky; /* Faz a sidebar "flutuar" ao rolar */
+    top: 20px;
+    
+    /* Adiciona a aparência de painel que estava faltando */
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color-strong);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    
+    /* Permite scroll interno se o conteúdo for muito grande */
+    max-height: 85vh; 
+    overflow-y: auto;
+    box-sizing: border-box; /* Garante que o padding não quebre o layout */
+}
+
+/* 4. Garante que os botões de filtro e ação usem o espaço corretamente */
+#game-board.jogador-board #acoes-disponiveis {
+     max-height: calc(85vh - 300px); /* Ajusta a altura de scroll */
+}
+
+/* --- ADIÇÃO: MELHORIA STATUS DE DESCONEXÃO (LOBBY) --- */
+.status-lobby.disconnected {
+    color: var(--cor-vermelho-negativo); /* Vermelho */
+    background: rgba(var(--cor-desbravador-rgb), 0.1);
+    border-style: dashed;
+    border-color: rgba(var(--cor-desbravador-rgb), 0.5);
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* --- ADIÇÃO: MELHORIA NA CAIXA DE JUSTIFICATIVA (JOGADOR) --- */
+
+/* 1. Transforma o contêiner em um "painel" */
+#justificativa-container {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color-strong);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+/* 2. Estiliza o título do painel */
+#justificativa-container h4 {
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color-soft);
+    color: var(--cor-estrategista); /* Laranja, para "Atenção/Ação" */
+}
+
+/* 3. Estiliza a caixa de texto (textarea) */
+#acao-justificativa {
+    width: 100%;
+    box-sizing: border-box; /* Garante que o padding não estoure a largura */
+    background: var(--bg-panel-darker);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color-soft);
+    border-left: 5px solid var(--cor-estrategista); /* Borda de destaque */
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical; /* Permite ao usuário redimensionar verticalmente */
+    min-height: 80px;
+    transition: all 0.2s ease;
+}
+
+/* 4. Estiliza o texto do placeholder */
+#acao-justificativa::placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* 5. Adiciona efeito de foco */
+#acao-justificativa:focus {
+    border-color: var(--cor-estrategista);
+    outline: none;
+    box-shadow: 0 0 8px rgba(var(--cor-estrategista-rgb), 0.5);
+}
+
+/* 6. Centraliza o botão de submissão */
+#submit-acao-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
 }
