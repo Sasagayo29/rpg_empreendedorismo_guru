@@ -15,8 +15,10 @@
 ## 📸 Screenshots
 
 <div align="center">
-  <img width="50%" height="811" alt="image" src="https://github.com/user-attachments/assets/ec06d891-ee23-4927-a675-137e2782c075" />
-  <img src="./screenshots/mobile-view.png" alt="Visão Mobile com Action Sheet" width="30%">
+  <img width="50%" height="937" alt="image" src="https://github.com/user-attachments/assets/bf034c1e-18a0-4e47-b354-4e20a7f29407" />
+  
+  <img width="20%" height="860" alt="image" src="https://github.com/user-attachments/assets/f80495d1-e7e2-48bb-bc37-f945bbae7f38" />
+
 </div>
 
 ---
