@@ -1,4 +1,4 @@
-# 🚀 Empreendedorismo Guru - O Jogo
+# 🚀 Empreendedorismo Guru RPG - O Jogo Web
 
 ![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
@@ -15,7 +15,7 @@
 ## 📸 Screenshots
 
 <div align="center">
-  <img width="50%" height="937" alt="image" src="https://github.com/user-attachments/assets/bf034c1e-18a0-4e47-b354-4e20a7f29407" />
+  <img width="70%" height="937" alt="image" src="https://github.com/user-attachments/assets/bf034c1e-18a0-4e47-b354-4e20a7f29407" />
   
 </div>
 
@@ -23,7 +23,7 @@
 
 ## 📋 Sobre o Projeto
 
-**Empreendedorismo Guru** é uma experiência gamificada desenvolvida em Python projetada para ensinar conceitos de gestão, estratégia e trabalho em equipe. O jogo conecta múltiplos jogadores (Startups) e um Mestre (Game Master) em uma sala virtual via WebSocket.
+**Empreendedorismo Guru** é uma experiência gamificada desenvolvida em Python projetada para ensinar conceitos de gestão, estratégia e trabalho em equipe. O jogo conecta múltiplos jogadores (Startups) e um Mestre (Game Master) em uma sala virtual via WebSocket. Inspirado no jogo de tabuleiro [Empreendedorismo Guru](https://www.empreendedorismo.guru/) idealizado e desenvolvido pelo Professor [Eduardo Jardel Veiga Gonçalves](https://www.linkedin.com/in/eduardojardel/?originalSubdomain=br).
 
 Os jogadores assumem papéis específicos (Classes) dentro de suas startups e devem tomar decisões cruciais em diferentes dimensões do negócio: **Equipe, Produto, Mercado, Competitividade e Recursos**.
 
