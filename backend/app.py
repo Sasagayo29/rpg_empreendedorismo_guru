@@ -10,11 +10,11 @@ import base64
 import random
 import string
 import uuid
+import eventlet
 
 app = Flask(__name__, static_folder='../frontend', template_folder='../frontend')
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
-
+socketio = SocketIO(app, cors_allowed_origins="*")
 jogos_ativos = {} 
 salas_info = {} 
 
