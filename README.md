@@ -2,11 +2,11 @@
 
 ![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
 ![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.dot.io&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 
 > Um jogo de simulação estratégica multiplayer em tempo real onde startups competem para dominar o mercado, gerenciar recursos e inovar, guiadas por um Mestre de Jogo.
 
@@ -23,7 +23,7 @@
 
 ## 📋 Sobre o Projeto
 
-**Empreendedorismo Guru** é uma experiência gamificada projetada para ensinar conceitos de gestão, estratégia e trabalho em equipe. O jogo conecta múltiplos jogadores (Startups) e um Mestre (Game Master) em uma sala virtual via WebSocket.
+**Empreendedorismo Guru** é uma experiência gamificada desenvolvida em Python projetada para ensinar conceitos de gestão, estratégia e trabalho em equipe. O jogo conecta múltiplos jogadores (Startups) e um Mestre (Game Master) em uma sala virtual via WebSocket.
 
 Os jogadores assumem papéis específicos (Classes) dentro de suas startups e devem tomar decisões cruciais em diferentes dimensões do negócio: **Equipe, Produto, Mercado, Competitividade e Recursos**.
 
@@ -32,7 +32,7 @@ Os jogadores assumem papéis específicos (Classes) dentro de suas startups e de
 ## ✨ Funcionalidades Principais
 
 ### 🎮 Gameplay
-* **Multiplayer em Tempo Real:** Conexão instantânea via Socket.IO com atualizações de estado ao vivo.
+* **Multiplayer em Tempo Real:** Conexão instantânea via Flask-SocketIO com atualizações de estado ao vivo.
 * **Sistema de Classes RPG:** 5 classes únicas, cada uma com habilidades especiais e afinidades:
     * 🔵 **Líder:** Focado em Equipe.
     * 🟣 **Visionário:** Focado em Produto.
@@ -45,7 +45,7 @@ Os jogadores assumem papéis específicos (Classes) dentro de suas startups e de
 ### 🎨 UI/UX (Interface do Usuário)
 * **Design Responsivo Mobile-First:**
     * **Desktop:** HUD com efeito *Glassmorphism* e layout expandido.
-    * **Mobile:** Padrão "Action Sheet" (Gaveta de Ações) moderna, maximizando a área de visualização do tabuleiro.
+    * **Mobile:** Padrão "Action Sheet" (Gaveta de Ações) moderna, maximizando a área de visualização do tabuleiro e evitando cortes de layout.
 * **Temas:** Suporte nativo a **Dark Mode** (padrão) e **Light Mode**.
 * **Feedback Visual:** Animações de pulso, notificações de toast e transições suaves.
 * **Acessibilidade:** Cores distintas para classes e feedbacks claros de erro/sucesso.
@@ -60,17 +60,18 @@ Os jogadores assumem papéis específicos (Classes) dentro de suas startups e de
     * JavaScript (Vanilla ES6+).
     * [Chart.js](https://www.chartjs.org/) (Gráficos de Radar).
 * **Backend:**
-    * Node.js.
-    * Express.
-    * Socket.IO (Comunicação WebSocket).
+    * **Python 3.x**.
+    * **Flask** (Web Framework).
+    * **Flask-SocketIO** (Comunicação WebSocket em tempo real).
+    * **QRCode** (Geração de códigos para entrada fácil no lobby).
 
 ---
 
 ## 🚀 Como Rodar o Projeto
 
 ### Pré-requisitos
-* [Node.js](https://nodejs.org/) instalado.
-* NPM ou Yarn.
+* [Python 3.8+](https://www.python.org/) instalado.
+* Pip (Gerenciador de pacotes do Python).
 
 ### Passo a Passo
 
@@ -81,25 +82,32 @@ Os jogadores assumem papéis específicos (Classes) dentro de suas startups e de
 
 2.  **Acesse a pasta do projeto:**
     ```bash
-    cd empreendedorismo-guru
+    cd empreendedorismo-guru/backend
     ```
 
-3.  **Instale as dependências:**
+3.  **Crie um ambiente virtual (Recomendado):**
     ```bash
-    npm install
+    python -m venv venv
+    # Windows
+    venv\Scripts\activate
+    # Linux/Mac
+    source venv/bin/activate
     ```
 
-4.  **Inicie o servidor:**
+4.  **Instale as dependências:**
     ```bash
-    npm start
-    # ou
-    node server.js
+    pip install flask flask-socketio flask-cors qrcode
     ```
 
-5.  **Acesse no navegador:**
-    * Abra `http://localhost:3000` (ou a porta configurada).
+5.  **Inicie o servidor:**
+    ```bash
+    python app.py
+    ```
+
+6.  **Acesse no navegador:**
+    * Abra `http://127.0.0.1:5000`.
     * Crie uma sala como **Mestre** em uma aba.
-    * Entre como **Jogador** em outras abas (ou pelo celular na mesma rede Wi-Fi).
+    * Entre como **Jogador** em outras abas (ou escaneie o QR Code com o celular na mesma rede Wi-Fi).
 
 ---
 
