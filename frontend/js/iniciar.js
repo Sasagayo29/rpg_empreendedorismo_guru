@@ -1,16 +1,10 @@
-// --- Conecta-se ao servidor Socket.IO ---
-// (Ele conecta-se automaticamente ao servidor que serviu a página)
 const socket = io();
 
-// --- Seletores da Página de Início ---
 const homeScreen = document.getElementById("home-screen");
 const homeNewGameBtn = document.getElementById("home-new-game-btn");
 const gameSetupDiv = document.getElementById("game-setup");
 const setupForm = document.getElementById("setup-form");
 
-// Seletores do Setup
-const numStartupsInput = document.getElementById("num-startups");
-const numJogadoresSelect = document.getElementById("num-jogadores");
 const equipesFormsContainer = document.getElementById(
     "equipes-forms-container"
 );
@@ -20,14 +14,12 @@ const nextStepBtn = document.getElementById("next-step-btn");
 const startGameBtn = document.getElementById("start-game-btn");
 let currentSetupStep = 0;
 
-// Seletores dos Modais e Tema
 const verClassesBtn = document.getElementById("ver-classes-btn");
 const bibliotecaModal = document.getElementById("biblioteca-modal");
 const fecharBibliotecaBtn = document.getElementById("fechar-biblioteca-btn");
 const themeToggleBtnHome = document.getElementById("theme-toggle-btn-home");
 const THEME_KEY = "empreendedorismoGuruTheme";
 
-// --- Função de Áudio ---
 function playAudio(soundId) {
     try {
         const audio = document.getElementById(soundId);
@@ -40,7 +32,6 @@ function playAudio(soundId) {
     }
 }
 
-// --- Funções de Tema (Copiadas) ---
 function applyTheme(theme) {
     const isLight = theme === "light";
     document.body.classList.toggle("light-mode", isLight);
@@ -61,55 +52,98 @@ function loadInitialTheme() {
     applyTheme(savedTheme);
 }
 
-// --- Funções de Setup (Copiadas e Adaptadas) ---
+
 function renderEquipeForms() {
-    const numStartups = parseInt(numStartupsInput.value);
-    const numJogadores = parseInt(numJogadoresSelect.value);
+    const numStartupsEl = document.getElementById("num-startups");
+    const numJogadoresEl = document.getElementById("num-jogadores");
+    const numStartups = numStartupsEl ? parseInt(numStartupsEl.value) : 2;
+    const numJogadores = numJogadoresEl ? parseInt(numJogadoresEl.value) : 3;
+
     equipesFormsContainer.innerHTML = "";
     setupNavigation.innerHTML = "";
     currentSetupStep = 0;
+    const configHtml = `
+        <fieldset data-step="0">
+            <legend>Configuração Geral</legend>
+            <div class="setup-config-bar">
+                <div class="form-group">
+                    <label for="num-startups">Número de Startups:</label>
+                    <input type="number" id="num-startups" min="1" max="4" value="${numStartups}" />
+                </div>
+                <div class="form-group">
+                    <label for="num-jogadores">Jogadores por Equipe:</label>
+                    <select id="num-jogadores">
+                        <option value="3" ${numJogadores === 3 ? 'selected' : ''}>3 Jogadores</option>
+                        <option value="4" ${numJogadores === 4 ? 'selected' : ''}>4 Jogadores</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+    `;
+    equipesFormsContainer.innerHTML += configHtml;
+
+    const configNavBtn = document.createElement("button");
+    configNavBtn.type = "button";
+    configNavBtn.className = "setup-nav-btn";
+    configNavBtn.innerText = "Config. Geral";
+    configNavBtn.setAttribute("data-step", 0);
+    configNavBtn.addEventListener("click", () => navigateToSetupStep(0));
+    setupNavigation.appendChild(configNavBtn);
+
     for (let i = 0; i < numStartups; i++) {
         const navBtn = document.createElement("button");
         navBtn.type = "button";
         navBtn.className = "setup-nav-btn";
         navBtn.innerText = `Startup ${i + 1}`;
-        navBtn.setAttribute("data-step", i);
-        navBtn.addEventListener("click", () => navigateToSetupStep(i));
-        if (i > 0) navBtn.disabled = true;
+        navBtn.setAttribute("data-step", i + 1); 
+        navBtn.addEventListener("click", () => navigateToSetupStep(i + 1));
+        navBtn.disabled = true; 
         setupNavigation.appendChild(navBtn);
+
         let jogadoresHtml = "";
         for (let j = 0; j < numJogadores; j++) {
             jogadoresHtml += `
                 <div class="form-group">
-                    <label for="jogador-nome-${i}-${j}">Jogador ${
-                j + 1
-            } Nome:</label>
+                    <label for="jogador-nome-${i}-${j}">Jogador ${j + 1} Nome:</label>
                     <input type="text" id="jogador-nome-${i}-${j}" required>
                     <label for="jogador-classe-${i}-${j}">Classe:</label>
                     <select id="jogador-classe-${i}-${j}">
-                        <option value="Líder">Líder</option><option value="Visionário">Visionário</option><option value="Desbravador">Desbravador</option><option value="Estrategista">Estrategista</option><option value="Guardião">Guardião</option>
+                        <option value="Líder">Líder</option>
+                        <option value="Visionário">Visionário</option>
+                        <option value="Desbravador">Desbravador</option>
+                        <option value="Estrategista">Estrategista</option>
+                        <option value="Guardião">Guardião</option>
                     </select>
                 </div>`;
         }
+        
         const equipeHtml = `
-            <fieldset data-step="${i}">
-                <legend>Configuração da Startup ${i + 1}</legend>
+            <fieldset data-step="${i + 1}"> <legend>Configuração da Startup ${i + 1}</legend>
                 <div class="form-group"><label for="startup-nome-${i}">Nome da Startup:</label><input type="text" id="startup-nome-${i}" required></div>
                 <div class="form-group"><label for="ideia-negocio-${i}">Ideia de Negócio:</label><input type="text" id="ideia-negocio-${i}" placeholder="Ex: Um app de delivery para pets" required></div>
                 ${jogadoresHtml}
             </fieldset>`;
         equipesFormsContainer.innerHTML += equipeHtml;
     }
+
+    document.getElementById("num-startups").addEventListener("change", renderEquipeForms);
+    document.getElementById("num-jogadores").addEventListener("change", renderEquipeForms);
+
     navigateToSetupStep(0);
 }
+
 function navigateToSetupStep(stepIndex) {
-    const numStartups = parseInt(numStartupsInput.value);
+    const numStartups = parseInt(document.getElementById("num-startups").value);
+    const totalSteps = numStartups + 1; 
+    
     currentSetupStep = stepIndex;
+
     document.querySelectorAll(".setup-nav-btn").forEach((btn) => {
         const btnStep = parseInt(btn.getAttribute("data-step"));
         btn.classList.toggle("active", btnStep === stepIndex);
-        btn.disabled = btnStep > stepIndex;
+        btn.disabled = btnStep > stepIndex; 
     });
+
     document
         .querySelectorAll("#equipes-forms-container fieldset")
         .forEach((fieldset) => {
@@ -119,12 +153,12 @@ function navigateToSetupStep(stepIndex) {
                 fieldsetStep === stepIndex
             );
         });
+    
     prevStepBtn.classList.toggle("hidden", stepIndex === 0);
-    nextStepBtn.classList.toggle("hidden", stepIndex === numStartups - 1);
-    startGameBtn.classList.toggle("hidden", stepIndex !== numStartups - 1);
+    nextStepBtn.classList.toggle("hidden", stepIndex === totalSteps - 1);
+    startGameBtn.classList.toggle("hidden", stepIndex !== totalSteps - 1);
 }
 
-// --- Função de Início (A Lógica Principal) ---
 async function criarLobby(e) {
     e.preventDefault();
     if (!setupForm.checkValidity()) {
@@ -135,8 +169,9 @@ async function criarLobby(e) {
     }
     playAudio("audio-clique");
 
-    const numStartups = parseInt(numStartupsInput.value);
-    const numJogadores = parseInt(numJogadoresSelect.value);
+    const numStartups = parseInt(document.getElementById("num-startups").value);
+    const numJogadores = parseInt(document.getElementById("num-jogadores").value);
+    
     const equipes = [];
     for (let i = 0; i < numStartups; i++) {
         const jogadores = [];
@@ -154,17 +189,12 @@ async function criarLobby(e) {
         });
     }
 
-    // 1. Envia os dados de setup para o servidor via Socket.IO
     console.log("Enviando dados para o servidor para criar o jogo...");
     socket.emit("iniciar_jogo", { equipes: equipes });
 }
 
-// --- Listeners do Socket.IO ---
 socket.on("jogo_criado", (data) => {
     console.log("Jogo criado com sucesso!", data);
-    // 2. O servidor respondeu com o ID da sala e os dados do lobby.
-    // 3. Vamos guardar os dados do lobby no sessionStorage (para a próxima página)
-    //    e redirecionar o Mestre para a página do lobby.
     sessionStorage.setItem("lobby_data", JSON.stringify(data));
     window.location.href = `/lobby?sala=${data.id_sala}`;
 });
@@ -174,18 +204,18 @@ socket.on("erro_jogo", (data) => {
     alert(`Erro ao criar o jogo: ${data.mensagem}`);
 });
 
-// --- Listeners de UI (Setup e Modais) ---
 homeNewGameBtn.addEventListener("click", () => {
     playAudio("audio-clique");
     homeScreen.classList.add("hidden");
     gameSetupDiv.classList.remove("hidden");
 });
-numStartupsInput.addEventListener("change", renderEquipeForms);
-numJogadoresSelect.addEventListener("change", renderEquipeForms);
-setupForm.addEventListener("submit", criarLobby); // Mudado de iniciarJogo para criarLobby
+
+
+setupForm.addEventListener("submit", criarLobby);
+
 nextStepBtn.addEventListener("click", () => {
     playAudio("audio-clique");
-    // Validação simples
+    
     const fieldsetAtual = document.querySelector(
         `fieldset[data-step="${currentSetupStep}"]`
     );
@@ -197,13 +227,19 @@ nextStepBtn.addEventListener("click", () => {
             input.reportValidity();
         }
     });
-    if (allValid) navigateToSetupStep(currentSetupStep + 1);
+
+    if (currentSetupStep === 0 || allValid) {
+        navigateToSetupStep(currentSetupStep + 1);
+    }
 });
+
 prevStepBtn.addEventListener("click", () => {
     playAudio("audio-clique");
     navigateToSetupStep(currentSetupStep - 1);
 });
+
 themeToggleBtnHome.addEventListener("click", toggleTheme);
+
 verClassesBtn.addEventListener("click", () => {
     playAudio("audio-virar-carta");
     bibliotecaModal.classList.remove("hidden");
@@ -216,6 +252,5 @@ bibliotecaModal.addEventListener("click", (e) => {
     if (e.target === bibliotecaModal) bibliotecaModal.classList.add("hidden");
 });
 
-// --- Inicialização ---
 renderEquipeForms();
 loadInitialTheme();

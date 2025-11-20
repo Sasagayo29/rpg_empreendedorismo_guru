@@ -1,25 +1,24 @@
 from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
-from guru import Jogo 
+from guru import Jogo
+from flask import send_from_directory
+import os
 import qrcode
 import io
 import base64
 import random
 import string
-import uuid # Importado na última etapa, ainda necessário
+import uuid
 
-# --- Configuração ---
 app = Flask(__name__, static_folder='../frontend', template_folder='../frontend')
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-# --- Gestão de Estado (Em Memória) ---
 jogos_ativos = {} 
 salas_info = {} 
 
 
-# --- Funções-Ajudante ---
 def gerar_id_sala(tamanho=5):
     while True:
         id_sala = ''.join(random.choices(string.ascii_uppercase + string.digits, k=tamanho))
@@ -33,7 +32,15 @@ def gerar_qr_code(url):
     img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return f"data:image/png;base64,{img_str}"
 
-# --- Rotas HTTP (Para servir as páginas) ---
+@app.route('/favicon.ico')
+def favicon():
+    """Serve o Logo.svg como o favicon."""
+    return send_from_directory(
+        os.path.join(app.static_folder, 'css', 'img'),
+        'Logo.svg', 
+        mimetype='image/svg+xml'
+    )
+    
 @app.route('/')
 def home():
     return send_from_directory(app.template_folder, 'index.html')
@@ -54,7 +61,6 @@ def jogador_dashboard():
 def serve_static(filename):
     return send_from_directory(app.static_folder, filename)
 
-# --- Eventos Socket.IO (A Lógica em Tempo Real) ---
 
 @socketio.on('iniciar_jogo')
 def handle_iniciar_jogo(dados_equipes):
@@ -67,8 +73,6 @@ def handle_iniciar_jogo(dados_equipes):
         
         nomes_equipes = [startup.get("nome") for startup in status_inicial]
         
-        # *** MELHORIA RECONEXÃO (Início) ***
-        # Cria o dicionário de "assentos" do jogador
         jogadores_info_inicial = {
             nome: {"sid": None, "conectado": False} for nome in nomes_equipes
         }
@@ -76,10 +80,9 @@ def handle_iniciar_jogo(dados_equipes):
         salas_info[id_sala] = {
             "mestre_sid": request.sid, 
             "nomes_equipes": nomes_equipes,
-            "jogadores_info": jogadores_info_inicial, # Nova estrutura
+            "jogadores_info": jogadores_info_inicial,
             "validacao_pendente": [] 
         }
-        # *** MELHORIA RECONEXÃO (Fim) ***
         
         print(f"Novo jogo criado! Sala ID: {id_sala}, Mestre SID: {request.sid}")
 
@@ -88,10 +91,12 @@ def handle_iniciar_jogo(dados_equipes):
         for startup in status_inicial:
             nome_startup = startup.get("nome")
             url_jogador = f"{base_url}jogador?sala={id_sala}&startup={nome_startup}"
+            
             dados_lobby.append({
                 "nome_startup": nome_startup,
                 "url": url_jogador,
-                "qr_code": gerar_qr_code(url_jogador)
+                "qr_code": gerar_qr_code(url_jogador),
+                "jogadores": startup.get("jogadores", [])
             })
 
         emit('jogo_criado', {"id_sala": id_sala, "dados_lobby": dados_lobby})
@@ -110,18 +115,15 @@ def handle_entrar_sala_mestre(data):
         salas_info[id_sala]["mestre_sid"] = request.sid
         print(f"Mestre (re)entrou na sala: {id_sala}")
         
-        # *** MELHORIA RECONEXÃO (Início) ***
-        # Lê da nova estrutura para encontrar jogadores conectados
         jogadores_info = salas_info[id_sala].get("jogadores_info", {})
         jogadores_conectados = [nome for nome, info in jogadores_info.items() if info["conectado"]]
-        # *** MELHORIA RECONEXÃO (Fim) ***
         
         emit('status_lobby_atual', {"jogadores_conectados": jogadores_conectados})
         
         emit('fila_validacao_atual', {"fila": salas_info[id_sala]["validacao_pendente"]})
         
-        if request.referrer.endswith('/mestre'):
-             emit('atualizar_estado', jogo.get_status_completo()) 
+        emit('atualizar_estado', jogo.get_status_completo()) 
+            
     else:
         emit('erro_jogo', {"mensagem": "Sala não encontrada."})
 
@@ -137,30 +139,22 @@ def handle_entrar_sala_jogador(data):
 
     join_room(id_sala)
     
-    # *** MELHORIA RECONEXÃO (Início) ***
-    # Atualiza o "assento" do jogador com o novo SID e status
     if id_sala in salas_info and nome_startup in salas_info[id_sala]["jogadores_info"]:
         salas_info[id_sala]["jogadores_info"][nome_startup]["sid"] = request.sid
         salas_info[id_sala]["jogadores_info"][nome_startup]["conectado"] = True
         print(f"Jogador '{nome_startup}' (re)conectou com SID: {request.sid}")
 
-        # Avisa o Mestre que um novo jogador se conectou
         mestre_sid = salas_info[id_sala].get("mestre_sid")
         if mestre_sid:
             emit('jogador_conectou', {"nome_startup": nome_startup}, to=mestre_sid)
-    # *** MELHORIA RECONEXÃO (Fim) ***
 
-    # Envia o estado completo para o jogador que acabou de entrar
     emit('atualizar_estado', jogo.get_status_completo())
 
-# *** MELHORIA RECONEXÃO (Início) ***
-# Novo evento para lidar com desconexões
 @socketio.on('disconnect')
 def handle_disconnect():
     sid_desconectado = request.sid
     print(f"Cliente desconectado: {sid_desconectado}")
 
-    # Encontra o jogador em qualquer sala e o marca como desconectado
     for id_sala, info_sala in salas_info.items():
         jogadores_info = info_sala.get("jogadores_info", {})
         for nome_startup, info_jogador in jogadores_info.items():
@@ -169,16 +163,11 @@ def handle_disconnect():
                 info_jogador["sid"] = None
                 print(f"Jogador '{nome_startup}' da sala '{id_sala}' foi marcado como desconectado.")
                 
-                # Avisa o Mestre no Lobby
                 mestre_sid = info_sala.get("mestre_sid")
                 if mestre_sid:
                     emit('jogador_desconectou', {"nome_startup": nome_startup}, to=mestre_sid)
                 
-                # (Opcional) Poderíamos também avisar os outros jogadores
-                # socketio.emit('oponente_desconectou', {"nome_startup": nome_startup}, to=id_sala)
-                
-                return # Encontramos, podemos parar
-# *** MELHORIA RECONEXÃO (Fim) ***
+                return
 
 @socketio.on('submeter_acao')
 def handle_submeter_acao(data):
@@ -219,25 +208,24 @@ def handle_validar_acao(data):
         
     if not aprovada:
         print(f"Ação de {acao_data['nome_startup']} RECUSADA pelo Mestre.")
+        
         socketio.emit('log_mensagem', {
-            "mensagem": f"Ação '{acao_data['acao_nome']}' da startup {acao_data['nome_startup']} foi RECUSADA pelo Mestre.",
+            "mensagem": f"Ação '{acao_data.get('acao_nome')}' da startup {acao_data['nome_startup']} foi RECUSADA pelo Mestre.",
             "tipo": "log-aviso"
         }, to=id_sala)
         
-        # *** MELHORIA RECONEXÃO (Início) ***
-        # Tenta encontrar o SID ATUAL do jogador para enviar a recusa
         jogador_sid_atual = salas_info[id_sala]["jogadores_info"][acao_data['nome_startup']].get("sid")
         if jogador_sid_atual:
-             emit('acao_recusada', acao_data, to=jogador_sid_atual)
+            emit('acao_recusada', acao_data, to=jogador_sid_atual)
         else:
             print(f"Não foi possível enviar 'acao_recusada' para {acao_data['nome_startup']}. Jogador offline.")
-        # *** MELHORIA RECONEXÃO (Fim) ***
         
     else:
         print(f"Ação de {acao_data['nome_startup']} APROVADA pelo Mestre.")
         jogo.registrar_acao_aprovada(acao_data)
+        
         socketio.emit('log_mensagem', {
-            "mensagem": f"Ação '{acao_data['acao_nome']}' da {acao_data['nome_startup']} foi APROVADA. (Aguardando resolução)",
+            "mensagem": f"Ação '{acao_data.get('acao_nome')}' da {acao_data['nome_startup']} foi APROVADA. (Aguardando resolução)",
             "tipo": "log-normal"
         }, to=id_sala)
     
@@ -272,7 +260,18 @@ def handle_mestre_resolver_turno(data):
         
     print(f"Mestre a resolver o turno da sala {id_sala}...")
     
-    resultados = jogo.resolver_turno_completo()
+    try:
+        resultados = jogo.resolver_turno_completo()
+        
+        if resultados.get("status") == "erro":
+            print(f"Erro ao resolver turno: {resultados.get('mensagem')}")
+            emit('erro_jogo', {"mensagem": resultados.get('mensagem')})
+            return
+
+    except Exception as e:
+        print(f"CRASH CRÍTICO ao resolver turno: {e}")
+        emit('erro_jogo', {"mensagem": f"Erro crítico no servidor ao resolver o turno: {e}"})
+        return
     
     for log in resultados.get("logs", []):
         socketio.emit('log_mensagem', log, to=id_sala)
@@ -280,13 +279,10 @@ def handle_mestre_resolver_turno(data):
     for item_evento in resultados.get("eventos", []):
         startup_nome = item_evento.get("startup_nome")
         
-        # *** MELHORIA RECONEXÃO (Início) ***
-        # Encontra o SID do jogador na nova estrutura
         jogador_sid = None
         jogadores_info = salas_info[id_sala].get("jogadores_info", {})
         if startup_nome in jogadores_info:
             jogador_sid = jogadores_info[startup_nome].get("sid")
-        # *** MELHORIA RECONEXÃO (Fim) ***
 
         if jogador_sid:
             emit('evento_subir_de_nivel', item_evento.get("evento"), to=jogador_sid)

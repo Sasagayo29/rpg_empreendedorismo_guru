@@ -4,40 +4,59 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard do Jogador - Empreendedorismo Guru</title>
-        <link rel="icon" type="image/png" href="/css/img/Logo.svg" />
+        <link rel="icon" type="image/svg+xml" href="/css/img/Logo.svg" />
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link rel="stylesheet" href="/css/style.css" />
+        <link rel="stylesheet" href="/css/style.css?v=2" />
     </head>
     <body>
-        <div class="theme-switch-wrapper">
-            <button id="theme-toggle-btn-game" class="theme-toggle-btn">
-                🌙
-            </button>
-        </div>
+        
+        <div id="game-board" class="jogador-board">
+            <div id="game-header">
+                <div class="header-content-wrapper">
+                    <div class="header-info">
+                        <h2>
+                            Fase Atual: <span id="current-phase-name">Aguardando...</span>
+                        </h2>
+                        <div id="market-condition-display" class="market-condition-banner hidden">
+                            <strong id="market-condition-name"></strong>
+                            <span id="market-condition-desc"></span>
+                        </div>
+                    </div>
+                    <div class="header-controls">
+                        <button id="theme-toggle-btn-game" class="theme-toggle-btn">
+                            🌙
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="startup-card-display">
+                <div id="startup-cards-container">
+                    </div>
+            </div>
 
-        <div class="container">
-            <div id="game-board" class="jogador-board">
-                <div id="startup-card-display">
-                    <div id="startup-cards-container"></div>
+            <div id="jogador-controles">
+
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab-btn active" data-tab="acao">Ação</button>
+                    <button class="sidebar-tab-btn" data-tab="log">Log</button>
+                    <button class="sidebar-tab-btn" data-tab="biblioteca">Classes</button>
                 </div>
 
-                <div id="jogador-controles" class="controls-sidebar">
-                    <div id="actions-container">
+                <div class="sidebar-content">
+                    <div id="acao-panel" class="sidebar-panel active">
+                        
                         <div id="turno-info" class="turno-info-box">
                             <h2>Turno da Startup:</h2>
                             <span id="current-startup-name">Aguardando...</span>
                         </div>
-
-                        <div id="player-turn-selector"></div>
-
+                        <div id="player-turn-selector">
+                            </div>
                         <div id="action-selection-area">
-                            <h4>Escolha a Ação Empreendedora:</h4>
-
                             <div id="dimensao-filtros"></div>
-
                             <div id="acoes-disponiveis"></div>
                         </div>
-
+                        
                         <div id="justificativa-container" class="hidden">
                             <h4>Justifique a sua Ação:</h4>
                             <textarea
@@ -45,166 +64,114 @@
                                 placeholder="Explique por que esta ação é importante para a sua startup agora..."
                                 rows="4"
                             ></textarea>
-                            <button id="submit-acao-btn" class="hidden">
-                                Submeter Ação
-                            </button>
+                            <div id="alvo-container" class="form-group hidden">
+                                <label for="alvo-select">Escolha o Alvo:</label>
+                                <select id="alvo-select"></select>
+                            </div>
+                            
+                            <div class="justificativa-botoes">
+                                <button id="justificativa-btn-cancelar" class="button-secondary">Cancelar</button>
+                                <button id="submit-acao-btn">Submeter Ação</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="log-panel" class="sidebar-panel">
+                        <ul id="jogador-log-list">
+                        </ul>
+                    </div>
+
+                    <div id="biblioteca-panel" class="sidebar-panel">
+                        <h4>As 5 Classes de Empreendedores</h4>
+                        <div class="biblioteca-container-compact">
+                            <div class="biblioteca-card classe-lider">
+                                <h3>Líder</h3>
+                                <p>Mantém equipes motivadas e produtivas, focado na harmonia e colaboração.</p>
+                            </div>
+                            <div class="biblioteca-card classe-desbravador">
+                                <h3>Desbravador</h3>
+                                <p>Comunicação excepcional, com talento para identificar e atrair clientes.</p>
+                            </div>
+                            <div class="biblioteca-card classe-visionario">
+                                <h3>Visionário</h3>
+                                <p>Criatividade e domínio de tecnologia, focado no aprimoramento de produtos.</p>
+                            </div>
+                            <div class="biblioteca-card classe-guardiao">
+                                <h3>Guardião</h3>
+                                <p>Raciocínio lógico, especialista em otimizar recursos e captar investimentos.</p>
+                            </div>
+                            <div class="biblioteca-card classe-estrategista">
+                                <h3>Estrategista</h3>
+                                <p>Percepção apurada para antecipar cenários e adaptar a empresa a mudanças.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            </div>
 
-                <div id="player-hud" class="hidden">
-                    <img id="hud-jogador-img" src="" alt="Retrato do Jogador" />
-                    <div class="hud-info">
-                        <h4 id="hud-classe-nome"></h4>
-                        <p id="hud-jogador-nome"></p>
-                        <p id="hud-afinidade-desc"></p>
-                    </div>
-                </div>
+        <div id="player-hud" class="hidden">
+            <img
+                id="hud-jogador-img"
+                src=""
+                alt="Retrato do Jogador"
+            />
+            <div class="hud-info">
+                <h4 id="hud-classe-nome"></h4>
+                <p id="hud-jogador-nome"></p>
+                <p id="hud-afinidade-desc"></p>
+                <button id="hud-toggle-btn" class="hud-toggle-btn" aria-label="Minimizar HUD">
+                    <span class="icon">▼</span>
+                </button>
+                <button id="hud-habilidade-btn" class="hud-habilidade-btn hidden">
+                    Usar Habilidade
+                </button>
             </div>
         </div>
 
-        <div id="biblioteca-modal" class="modal-overlay hidden">
-            <div class="biblioteca-content">
-                <h2>As 5 Classes de Empreendedores</h2>
-                <div class="biblioteca-container">
-                    <div class="biblioteca-card classe-lider">
-                        <img
-                            src="/css/img/portraits/lider.png"
-                            alt="Líder"
-                            class="biblioteca-img"
-                        />
-                        <h3>Líder</h3>
-                        <p>
-                            Possuem um talento especial para manter equipes
-                            motivadas e produtivas. Sua liderança eficaz promove
-                            a harmonia e a colaboração entre os membros do
-                            negócio, contribuindo significativamente para o
-                            desenvolvimento pessoal dos colaboradores e a
-                            evolução das práticas de trabalho. O carismático.
-                        </p>
-                    </div>
-                    <div class="biblioteca-card classe-desbravador">
-                        <img
-                            src="/css/img/portraits/desbravador.png"
-                            alt="Desbravador"
-                            class="biblioteca-img"
-                        />
-                        <h3>Desbravador</h3>
-                        <p>
-                            Empreendedores dotados de uma capacidade de
-                            comunicação excepcional. Eles têm um talento
-                            especial para identificar e atrair clientes,
-                            transmitindo com eficácia os valores e as vantagens
-                            que a empresa tem a oferecer. O vendedor.
-                        </p>
-                    </div>
-                    <div class="biblioteca-card classe-visionario">
-                        <img
-                            src="/css/img/portraits/visionario.png"
-                            alt="Visionário"
-                            class="biblioteca-img"
-                        />
-                        <h3>Visionário</h3>
-                        <p>
-                            Destacados por sua grande criatividade e habilidade
-                            para dominar novas tecnologias. Eles inspiram suas
-                            equipes a "pensar fora da caixa" e mantêm um foco
-                            constante no aprimoramento dos produtos e serviços
-                            da empresa. O inventor.
-                        </p>
-                    </div>
-                    <div class="biblioteca-card classe-guardiao">
-                        <img
-                            src="/css/img/portraits/guardiao.png"
-                            alt="Guardião"
-                            class="biblioteca-img"
-                        />
-                        <h3>Guardião</h3>
-                        <p>
-                            Se distinguem por sua excepcional capacidade de
-                            raciocínio lógico. Eles são especialistas em
-                            otimizar o uso de recursos dentro da empresa e
-                            excelentes na construção de argumentos convincentes
-                            para captar recursos junto a investidores. O
-                            racionalista.
-                        </p>
-                    </div>
-                    <div class="biblioteca-card classe-estrategista">
-                        <img
-                            src="/css/img/portraits/estrategista.png"
-                            alt="Estrategista"
-                            class="biblioteca-img"
-                        />
-                        <h3>Estrategista</h3>
-                        <p>
-                            Notáveis por sua percepção apurada, habilidade em
-                            antecipar cenários futuros e adaptar a empresa às
-                            mudanças previstas. Eles buscam ativamente
-                            informações que possam beneficiar o negócio e
-                            promovem uma maior dinâmica nas operações da
-                            empresa. O vidente.
-                        </p>
-                    </div>
-                </div>
-                <button id="fechar-biblioteca-btn">Fechar</button>
-            </div>
-        </div>
         <div id="classe-modal" class="modal-overlay hidden">
-            <div class="flashcard-container">
-                <div id="classe-card" class="flashcard">
-                    <div id="classe-card-front" class="front"></div>
-                    <div id="classe-card-back" class="back"></div>
-                </div>
-            </div>
-        </div>
-        <div id="evento-modal" class="modal-overlay hidden">
-            <div class="flashcard-container">
-                <div id="evento-card" class="flashcard">
-                    <div id="evento-card-front" class="front">
-                        <h3>Evento Misterioso!</h3>
-                        <p>Clique para revelar</p>
-                    </div>
-                    <div id="evento-card-back" class="back">
-                        <h3 id="evento-nome"></h3>
-                        <p id="evento-descricao"></p>
-                        <p
-                            id="evento-resultado"
-                            class="evento-resultado-texto"
-                        ></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="fim-de-jogo-modal" class="modal-overlay hidden">
-            <div class="fim-de-jogo-content">
-                <h2>O Jogo Terminou!</h2>
-                <h3 id="vencedor-nome"></h3>
-                <p>
-                    Parabéns por completar a jornada do Empreendedorismo Guru!
-                </p>
-                <button id="jogar-novamente-btn">Jogar Novamente</button>
+            <div class="flashcard" id="classe-card">
+                <div class="flashcard-front" id="classe-card-front"></div>
+                <div class="flashcard-back" id="classe-card-back"></div>
             </div>
         </div>
 
+        <div id="evento-modal" class="modal-overlay hidden">
+            <div class="flashcard" id="evento-card">
+                <div class="flashcard-front">
+                    <h3 id="evento-nome"></h3>
+                    <p id="evento-descricao"></p>
+                </div>
+                <div class="flashcard-back">
+                    <h3 id="evento-resultado"></h3>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fim-de-jogo-modal" class="modal-overlay hidden">
+            <div class="popup-content tipo-sucesso">
+                <h2>Fim de Jogo!</h2>
+                <p id="vencedor-nome">A startup Vencedora venceu!</p>
+                <button id="jogar-novamente-btn" class="button-aprovar">Voltar ao Início</button>
+            </div>
+        </div>
+
+        <div id="popup-modal" class="modal-overlay hidden">
+            <div class="popup-content">
+                <h3 id="popup-title"></h3>
+                <p id="popup-message"></p>
+                <div id="popup-buttons" class="custom-modal-buttons"></div>
+            </div>
+        </div>
         <audio id="audio-clique" src="/audio/clique.mp3" preload="auto"></audio>
-        <audio
-            id="audio-virar-carta"
-            src="/audio/virar-carta.mp3"
-            preload="auto"
-        ></audio>
-        <audio
-            id="audio-sucesso"
-            src="/audio/sucesso.mp3"
-            preload="auto"
-        ></audio>
+        <audio id="audio-virar-carta" src="/audio/virar-carta.mp3" preload="auto"></audio>
+        <audio id="audio-sucesso" src="/audio/sucesso.mp3" preload="auto"></audio>
         <audio id="audio-falha" src="/audio/falha.mp3" preload="auto"></audio>
-        <audio
-            id="audio-vitoria"
-            src="/audio/vitoria.mp3"
-            preload="auto"
-        ></audio>
+        <audio id="audio-vitoria" src="/audio/vitoria.mp3" preload="auto"></audio>
 
         <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-        <script src="/js/jogador.js?v=25"></script>
+        <script src="/js/script.js"></script>
+        <script src="/js/jogador.js"></script>
     </body>
 </html>

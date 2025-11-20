@@ -1,15 +1,13 @@
-// --- ESTADO GLOBAL DO JOGADOR ---
 let meuNomeStartup = "";
 let idSala = "";
-let acaoSelecionada = null; // Guarda {id, nome, dimensao, tipo_acao, jogador_nome}
-let jogadorSelecionado = null; // Guarda o OBJETO do jogador selecionado
-let estadoJogoAtual = {}; // O estado completo vindo do servidor
+let acaoSelecionada = null; 
+let jogadorSelecionado = null; 
+let estadoJogoAtual = {}; 
 let acoesSubmetidasLocal = { coletiva: false, individual: false };
+let modoHabilidade = false; 
 
-// --- Conexão Socket.IO ---
 const socket = io();
 
-// --- Seletores do Jogo ---
 const gameBoardDiv = document.getElementById("game-board");
 const startupCardsContainer = document.getElementById(
     "startup-cards-container"
@@ -20,30 +18,15 @@ const acoesDisponiveisDiv = document.getElementById("acoes-disponiveis");
 const turnoInfoBox = document.getElementById("turno-info");
 const actionSelectionArea = document.getElementById("action-selection-area");
 
-// --- Seletores de Submissão ---
 const justificativaContainer = document.getElementById(
     "justificativa-container"
 );
 const justificativaTextarea = document.getElementById("acao-justificativa");
 const submitAcaoBtn = document.getElementById("submit-acao-btn");
+const alvoContainer = document.getElementById("alvo-container");
+const alvoSelect = document.getElementById("alvo-select"); 
+const justificativaBtnCancelar = document.getElementById("justificativa-btn-cancelar");
 
-// --- Seletores dos Modais ---
-const classeModal = document.getElementById("classe-modal");
-const classeCard = document.getElementById("classe-card");
-const classeCardFront = document.getElementById("classe-card-front");
-const classeCardBack = document.getElementById("classe-card-back");
-const eventoModal = document.getElementById("evento-modal");
-const eventoCard = document.getElementById("evento-card");
-const eventoNome = document.getElementById("evento-nome");
-const eventoDescricao = document.getElementById("evento-descricao");
-const eventoResultado = document.getElementById("evento-resultado");
-const fimDeJogoModal = document.getElementById("fim-de-jogo-modal");
-const vencedorNome = document.getElementById("vencedor-nome");
-const jogarNovamenteBtn = document.getElementById("jogar-novamente-btn");
-const bibliotecaModal = document.getElementById("biblioteca-modal");
-const fecharBibliotecaBtn = document.getElementById("fechar-biblioteca-btn");
-
-// --- Seletores do Filtro e HUD ---
 const dimensaoFiltrosContainer = document.getElementById("dimensao-filtros");
 let currentDimensaoFilter = "todos";
 const playerHUD = document.getElementById("player-hud");
@@ -51,66 +34,61 @@ const hudJogadorImg = document.getElementById("hud-jogador-img");
 const hudClasseNome = document.getElementById("hud-classe-nome");
 const hudJogadorNome = document.getElementById("hud-jogador-nome");
 const hudAfinidadeDesc = document.getElementById("hud-afinidade-desc");
+const hudHabilidadeBtn = document.getElementById("hud-habilidade-btn");
 
-// --- Seletores de Tema ---
+const hudToggleBtn = document.getElementById("hud-toggle-btn"); 
+const HUD_MINIMIZED_KEY = 'guruHudMinimized';
+
 const themeToggleBtnGame = document.getElementById("theme-toggle-btn-game");
-const THEME_KEY = "empreendedorismoGuruTheme";
+
+const sidebarTabs = document.querySelector("#jogador-controles .sidebar-tabs");
+const acaoPanel = document.getElementById("acao-panel");
+const logPanel = document.getElementById("log-panel");
+const bibliotecaPanel = document.getElementById("biblioteca-panel");
+const jogadorLogList = document.getElementById("jogador-log-list");
 
 const CHART_INSTANCES = {};
 
-// --- Função de Áudio ---
-function playAudio(soundId) {
-    try {
-        const audio = document.getElementById(soundId);
-        if (audio) {
-            audio.currentTime = 0;
-            audio.play();
-        }
-    } catch (e) {
-        console.warn(e);
+function toggleHudMinimize() {
+    playerHUD.classList.toggle('minimized');
+    const isMinimized = playerHUD.classList.contains('minimized');
+    localStorage.setItem(HUD_MINIMIZED_KEY, isMinimized ? 'true' : 'false');
+    
+    if (hudToggleBtn) {
+        hudToggleBtn.querySelector('.icon').innerText = isMinimized ? '▲' : '▼';
+    }
+
+    if (acaoPanel && acaoPanel.classList.contains('active')) {
+        acoesDisponiveisDiv.scrollTo(0, 0); 
     }
 }
 
-// --- Funções de Tema (Copiadas) ---
-function applyTheme(theme) {
-    const isLight = theme === "light";
-    document.body.classList.toggle("light-mode", isLight);
-    const icon = isLight ? "☀️" : "🌙";
-    themeToggleBtnGame.innerText = icon;
-    localStorage.setItem(THEME_KEY, theme);
-    if (Object.keys(CHART_INSTANCES).length > 0 && estadoJogoAtual.startups) {
-        // *** MELHORIA FEEDBACK (Início) ***
-        // Chama a nova função para redesenhar TODOS os cards
-        renderTodosOsCards(estadoJogoAtual.startups, estadoJogoAtual.fase_atual, estadoJogoAtual.submissoes_pendentes);
-        // *** MELHORIA FEEDBACK (Fim) ***
+function loadHudState() {
+    const savedState = localStorage.getItem(HUD_MINIMIZED_KEY);
+    if (savedState === 'true') {
+        playerHUD.classList.add('minimized');
+        if (hudToggleBtn) hudToggleBtn.querySelector('.icon').innerText = '▲';
+    } else if (hudToggleBtn) {
+        hudToggleBtn.querySelector('.icon').innerText = '▼';
     }
 }
-function toggleTheme() {
-    playAudio("audio-clique");
-    const currentTheme = document.body.classList.contains("light-mode")
-        ? "light"
-        : "dark";
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    applyTheme(newTheme);
-}
-function loadInitialTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY) || "dark";
-    applyTheme(savedTheme);
+
+function addLogMessage(message, tipo = "log-normal") {
+    if (!message || !jogadorLogList) return;
+    const li = document.createElement("li");
+    li.textContent = message;
+    li.className = tipo;
+    jogadorLogList.prepend(li);
 }
 
-// --- Funções de Renderização (Adaptadas para o Jogador) ---
-
-// *** MELHORIA FEEDBACK (Início) ***
-// Função "renderMeuCard" foi substituída por "renderTodosOsCards"
 function renderTodosOsCards(startups, faseAtual, submissoesPendentes) {
     if (!startups || startups.length === 0) return;
-    startupCardsContainer.innerHTML = ""; // Limpa
+    startupCardsContainer.innerHTML = ""; 
 
     startups.forEach(startup => {
         const card = document.createElement("div");
         card.className = "startup-card";
         
-        // Adiciona classes de destaque
         if (startup.nome === meuNomeStartup) {
             card.classList.add("meu-card");
         } else {
@@ -119,25 +97,22 @@ function renderTodosOsCards(startups, faseAtual, submissoesPendentes) {
         
         if (startup.esta_eliminada) card.classList.add("eliminada");
 
-        // Lógica de Status (copiada do mestre.js)
         const submissao = submissoesPendentes[startup.nome];
         let statusTurno = "";
 
         if (faseAtual === "RESOLUCAO") {
              statusTurno = "<span class='status-info'>Turno Resolvido</span>";
         } else if (submissao) {
-            if (faseAtual === "COLETIVA") {
-                if (submissao.coletiva) {
-                    statusTurno = "<span class='status-aprovado'>✔️ Ação Coletiva Aprovada</span>";
-                } else {
-                    statusTurno = "<span class='status-pendente'>Aguardando Ação Coletiva...</span>";
-                }
-            } else if (faseAtual === "INDIVIDUAL") {
-                if (submissao.individual) {
-                    statusTurno = "<span class='status-aprovado'>✔️ Ação Individual Aprovada</span>";
-                } else {
-                    statusTurno = "<span class='status-pendente'>Aguardando Ação Individual...</span>";
-                }
+            if (faseAtual === "INDIVIDUAL" && submissao.habilidade) {
+                statusTurno = "<span class='status-aprovado'>✔️ Habilidade Aprovada</span>";
+            } else if (faseAtual === "INDIVIDUAL" && submissao.individual) {
+                statusTurno = "<span class='status-aprovado'>✔️ Ação Individual Aprovada</span>";
+            } else if (faseAtual === "COLETIVA" && submissao.coletiva) {
+                statusTurno = "<span class='status-aprovado'>✔️ Ação Coletiva Aprovada</span>";
+            } else if (faseAtual === "INDIVIDUAL" && !submissao.individual) {
+                statusTurno = "<span class='status-pendente'>Aguardando Ação Individual...</span>";
+            } else if (faseAtual === "COLETIVA" && !submissao.coletiva) {
+                 statusTurno = "<span class='status-pendente'>Aguardando Ação Coletiva...</span>";
             }
         } else {
              statusTurno = "<span class='status-pendente'>Aguardando Ação...</span>";
@@ -158,8 +133,9 @@ function renderTodosOsCards(startups, faseAtual, submissoesPendentes) {
 
         card.innerHTML = `
             <h3>${startup.nome} (Nível: ${startup.nivel})</h3>
-            <p class="status-container">${statusTurno}</p> <p><strong>Ideia:</strong> ${startup.ideia_negocio}</p>
-            <div class="radar-chart-container" style="height: 250px;">
+            <p class="status-container">${statusTurno}</p>
+            <p><strong>Ideia:</strong> ${startup.ideia_negocio}</p>
+            <div class="radar-chart-container">
                 <canvas id="chart-${startup.nome}"></canvas>
             </div>
             <p><strong>Jogadores:</strong></p>
@@ -168,83 +144,15 @@ function renderTodosOsCards(startups, faseAtual, submissoesPendentes) {
             </ul>
         `;
         startupCardsContainer.appendChild(card);
-        renderRadarChart(startup); // Reutiliza a função de gráfico
-    });
-}
-// *** MELHORIA FEEDBACK (Fim) ***
-
-function renderRadarChart(startup) {
-    const ctx = document
-        .getElementById(`chart-${startup.nome}`)
-        .getContext("2d");
-    const isLightMode = document.body.classList.contains("light-mode");
-    const textColor = isLightMode ? "#333" : "#e0e0e0";
-    const gridColor = isLightMode
-        ? "rgba(0, 0, 0, 0.1)"
-        : "rgba(255, 255, 255, 0.2)";
-    const pointLabelColor = isLightMode ? "#1e3a8a" : "#e0e0e0";
-    const ticksColor = isLightMode ? "#64748b" : "#e0e0e0";
-    const ticksBackdrop = isLightMode
-        ? "rgba(255, 255, 255, 0.7)"
-        : "rgba(0, 0, 0, 0.5)";
-    const datasetBackgroundColor = isLightMode
-        ? "rgba(59, 130, 246, 0.2)"
-        : "rgba(var(--cor-lider-rgb), 0.3)";
-    const datasetBorderColor = isLightMode
-        ? "rgb(59, 130, 246)"
-        : "rgb(var(--cor-lider-rgb))";
-
-    const chartData = {
-        labels: Object.keys(startup.dimensoes).map(
-            (d) => d.charAt(0).toUpperCase() + d.slice(1)
-        ),
-        datasets: [
-            {
-                label: `Nível das Dimensões`,
-                data: Object.values(startup.dimensoes),
-                fill: true,
-                backgroundColor: datasetBackgroundColor,
-                borderColor: datasetBorderColor,
-                pointBackgroundColor: datasetBorderColor,
-                pointBorderColor: "#fff",
-                pointHoverBackgroundColor: "#fff",
-                pointHoverBorderColor: datasetBorderColor,
-            },
-        ],
-    };
-    if (CHART_INSTANCES[startup.nome]) CHART_INSTANCES[startup.nome].destroy();
-    CHART_INSTANCES[startup.nome] = new Chart(ctx, {
-        type: "radar",
-        data: chartData,
-        options: {
-            plugins: { legend: { labels: { color: textColor } } },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    suggestedMax: 5,
-                    suggestedMin: 0,
-                    grid: { color: gridColor },
-                    ticks: { color: ticksColor, backdropColor: ticksBackdrop },
-                    pointLabels: {
-                        color: pointLabelColor,
-                        font: { size: 13, weight: "bold" },
-                    },
-                },
-            },
-            elements: { line: { tension: 0.1 } },
-            responsive: true,
-            maintainAspectRatio: false,
-        },
+        renderRadarChart(startup);
     });
 }
 
 function updateTurnoInfo(minhaStartup, faseAtual, minhaSubmissao) {
     currentStartupNameSpan.innerText = minhaStartup.nome;
-    justificativaContainer.classList.add("hidden");
-    submitAcaoBtn.classList.add("hidden");
-    justificativaTextarea.value = "";
-    acaoSelecionada = null;
+    cancelarAcao(); 
     jogadorSelecionado = null;
+    modoHabilidade = false;
 
     if (faseAtual === "COLETIVA") {
         turnoInfoBox.style.borderColor = "var(--cor-guardiao)"; 
@@ -263,10 +171,11 @@ function updateTurnoInfo(minhaStartup, faseAtual, minhaSubmissao) {
         playerTurnSelectorDiv.innerHTML =
             "<strong>Selecione o Jogador para a Ação Individual:</strong>";
         hidePlayerHUD();
-
-        if (minhaSubmissao.individual) {
+        
+        if (minhaSubmissao.individual || minhaSubmissao.habilidade) {
+            const acaoFeita = minhaSubmissao.individual ? "Ação Individual" : "Habilidade";
             desabilitarControles(
-                "Ação Individual submetida. Aguardando Mestre..."
+                `${acaoFeita} submetida. Aguardando Mestre...`
             );
         } else {
             habilitarControles(); 
@@ -279,10 +188,9 @@ function updateTurnoInfo(minhaStartup, faseAtual, minhaSubmissao) {
                     jogadorSelecionado = jogador; 
                     updatePlayerHUD(jogador);
 
-                    document
-                        .querySelectorAll("#player-turn-selector button")
-                        .forEach((b) => (b.disabled = true));
-                    btn.disabled = false;
+                    
+                    document.querySelectorAll("#player-turn-selector button").forEach((b) => b.classList.remove('active'));
+                    btn.classList.add('active');
 
                     renderAcoes(minhaStartup, faseAtual, minhaSubmissao);
                 };
@@ -315,11 +223,18 @@ function renderAcoes(minhaStartup, faseAtual, minhaSubmissao) {
     for (const [dimensao, acoes] of Object.entries(
         estadoJogoAtual.acoesDisponiveis
     )) {
-        if (filtro !== "todos" && dimensao !== filtro) continue;
+        
+        if (modoHabilidade) {
+            if (jogadorSelecionado.classe === 'Visionário' && dimensao !== 'produto') continue;
+            if (jogadorSelecionado.classe === 'Líder' && dimensao !== 'equipe') continue;
+        } else if (filtro !== "todos" && dimensao !== filtro) {
+            continue; 
+        }
+        
         const dimensaoHeader = document.createElement("h5");
         dimensaoHeader.innerText = dimensao.toUpperCase();
 
-        if (faseAtual === "INDIVIDUAL" && jogadorSelecionado) {
+        if (faseAtual === "INDIVIDUAL" && jogadorSelecionado && !modoHabilidade) {
             if (dimensao === afinidade) {
                 dimensaoHeader.classList.add(
                     "highlighted-by-affinity",
@@ -339,23 +254,44 @@ function renderAcoes(minhaStartup, faseAtual, minhaSubmissao) {
             btn.onclick = () => selecionarAcao(acao, dimensao, btn);
 
             let desabilitar = false;
+            const acaoJaFeita = acoesFeitasPelaStartup.includes(acao.nome);
+            
+            if (acaoJaFeita) {
+                let ehHabilidadeReutilizavel = false;
+                if (modoHabilidade && jogadorSelecionado.classe === 'Visionário' && dimensao === 'produto') {
+                    ehHabilidadeReutilizavel = true;
+                }
+                if (modoHabilidade && jogadorSelecionado.classe === 'Líder' && dimensao === 'equipe') {
+                    ehHabilidadeReutilizavel = true;
+                }
 
-            if (acoesFeitasPelaStartup.includes(acao.nome)) {
-                btn.classList.add("acao-realizada");
+                if (ehHabilidadeReutilizavel) {
+                    btn.classList.add("acao-iteracao"); 
+                    desabilitar = false;
+                } else {
+                    btn.classList.add("acao-realizada");
+                    desabilitar = true;
+                }
+            }
+            
+            else if (faseAtual === "RESOLUCAO") {
                 desabilitar = true;
-            } else if (faseAtual === "RESOLUCAO") {
+            }
+            else if (faseAtual === "COLETIVA" && minhaSubmissao.coletiva) {
                 desabilitar = true;
-            } else if (faseAtual === "COLETIVA" && minhaSubmissao.coletiva) {
+            }
+            else if (faseAtual === "INDIVIDUAL" && (minhaSubmissao.individual || minhaSubmissao.habilidade)) {
                 desabilitar = true;
-            } else if (
-                faseAtual === "INDIVIDUAL" &&
-                minhaSubmissao.individual
-            ) {
-                desabilitar = true;
-            } else if (faseAtual === "INDIVIDUAL" && !jogadorSelecionado) {
+            }
+            else if (faseAtual === "INDIVIDUAL" && !jogadorSelecionado) {
                 btn.classList.add("disabled-by-affinity");
                 desabilitar = true;
-            } else if (
+            }
+            else if (modoHabilidade && (jogadorSelecionado.classe !== 'Visionário' && jogadorSelecionado.classe !== 'Líder')) {
+                 desabilitar = true; 
+            }
+            else if (
+                !modoHabilidade &&
                 faseAtual === "INDIVIDUAL" &&
                 jogadorSelecionado &&
                 dimensao !== afinidade
@@ -368,6 +304,7 @@ function renderAcoes(minhaStartup, faseAtual, minhaSubmissao) {
 
             if (
                 !desabilitar &&
+                !modoHabilidade &&
                 faseAtual === "INDIVIDUAL" &&
                 jogadorSelecionado &&
                 dimensao === afinidade
@@ -386,15 +323,16 @@ function selecionarAcao(acao, dimensao, btn) {
     const faseAtual = estadoJogoAtual.fase_atual;
     let tipoAcao, nomeJogador;
 
-    if (faseAtual === "COLETIVA") {
+    if (modoHabilidade) {
+        tipoAcao = "habilidade";
+        nomeJogador = jogadorSelecionado.nome;
+    } else if (faseAtual === "COLETIVA") {
         tipoAcao = "coletiva";
         nomeJogador = "Equipa"; 
     } else if (faseAtual === "INDIVIDUAL") {
         tipoAcao = "individual";
         if (!jogadorSelecionado) {
-            alert(
-                "Por favor, selecione primeiro o jogador que fará a ação individual."
-            );
+            showPopup('Ação Inválida', 'Por favor, selecione primeiro o jogador que fará a ação individual.', 'aviso'); 
             return;
         }
         nomeJogador = jogadorSelecionado.nome;
@@ -402,81 +340,191 @@ function selecionarAcao(acao, dimensao, btn) {
         return; 
     }
 
-    document.querySelectorAll(".acao-button.selected").forEach((b) => {
-        b.classList.remove("selected");
-    });
+    acoesDisponiveisDiv.querySelectorAll(".acao-button").forEach((b) => (b.disabled = true));
+    dimensaoFiltrosContainer.querySelectorAll(".filtro-btn").forEach((b) => (b.disabled = true));
+    
+    btn.disabled = false;
     btn.classList.add("selected");
 
     acaoSelecionada = {
         id: acao.id,
-        nome: acao.nome,
+        acao_nome: acao.nome,
+        nome_startup: meuNomeStartup, 
         dimensao: dimensao,
         tipo_acao: tipoAcao,
         jogador_nome: nomeJogador,
+        classe_jogador: jogadorSelecionado ? jogadorSelecionado.classe : null 
     };
 
     justificativaContainer.classList.remove("hidden");
-    submitAcaoBtn.classList.remove("hidden");
     justificativaTextarea.value = "";
     justificativaTextarea.focus();
 }
 
-function submeterAcao() {
+function cancelarAcao() {
     playAudio("audio-clique");
+    
+    justificativaContainer.classList.add("hidden");
+    alvoContainer.classList.add("hidden");
+    alvoSelect.innerHTML = "";
+    
+    acaoSelecionada = null;
+    
+    dimensaoFiltrosContainer.querySelectorAll(".filtro-btn").forEach((b) => (b.disabled = false));
+    
+    const minhaStartup = estadoJogoAtual.startups.find((s) => s.nome === meuNomeStartup);
+    if (minhaStartup) {
+        renderAcoes(
+            minhaStartup,
+            estadoJogoAtual.fase_atual,
+            estadoJogoAtual.submissoes_pendentes[meuNomeStartup]
+        );
+    }
+}
+
+function submeterAcao() {
+    playAudio("audio-clique"); 
     const justificativa = justificativaTextarea.value;
 
     if (!acaoSelecionada) {
-        alert("Erro: Nenhuma ação foi selecionada.");
+        showPopup('Erro', 'Nenhuma ação foi selecionada.', 'erro');
         return;
     }
     if (justificativa.trim().length < 5) {
-        alert("Por favor, escreva uma breve justificativa para a sua ação.");
+        showPopup('Justificativa Inválida', 'Por favor, escreva uma breve justificativa para a sua ação.', 'aviso'); 
         justificativaTextarea.focus();
         return;
     }
-
-    if (acaoSelecionada.tipo_acao === "coletiva") {
-        acoesSubmetidasLocal.coletiva = true;
-    } else {
-        acoesSubmetidasLocal.individual = true;
+    
+    let alvo = null;
+    if (modoHabilidade && jogadorSelecionado.classe === 'Desbravador') {
+        alvo = alvoSelect.value;
+        if (!alvo) {
+            showPopup('Ação Incompleta', 'Por favor, escolha um oponente para ser o alvo da habilidade.', 'aviso');
+            return;
+        }
+        acaoSelecionada.alvo = alvo;
+        acaoSelecionada.acao_nome = `Marketing Agressivo (Alvo: ${alvo})`;
     }
 
     socket.emit("submeter_acao", {
+        ...acaoSelecionada, 
         id_sala: idSala,
-        nome_startup: meuNomeStartup,
-        acao_id: acaoSelecionada.id,
-        acao_nome: acaoSelecionada.nome,
-        dimensao: acaoSelecionada.dimensao,
         justificativa: justificativa,
-        tipo_acao: acaoSelecionada.tipo_acao,
-        jogador_nome: acaoSelecionada.jogador_nome,
     });
 
     desabilitarControles("Ação submetida! Aguardando aprovação do Mestre...");
 }
 
-// Funções para desabilitar/habilitar a UI
+function usarHabilidade() {
+    if (!jogadorSelecionado) return;
+
+    const classe = jogadorSelecionado.classe;
+    let confirmMsg = "";
+    let nomeHabilidade = "";
+    let acaoId = `habilidade_${classe.toLowerCase()}`;
+    let dimensao = jogadorSelecionado.dimensao_afinidade;
+
+    if (classe === 'Guardião') {
+        nomeHabilidade = "Rodada de Investimento";
+        confirmMsg = "Tem certeza que quer usar 'Rodada de Investimento'?\n\nEfeito: +2 Recursos, -1 Equipe.\n(Deve ser aprovado pelo Mestre)";
+    } else if (classe === 'Desbravador') {
+        nomeHabilidade = "Marketing Agressivo";
+        confirmMsg = "Tem certeza que quer usar 'Marketing Agressivo'?\n\nEfeito: +1 Mercado (para você), -1 Mercado (para um alvo).\n(Deve ser aprovado pelo Mestre)";
+    } else if (classe === 'Visionário') {
+        nomeHabilidade = "Iteração Rápida";
+        confirmMsg = "Tem certeza que quer usar 'Iteração Rápida'?\n\nEfeito: Permite refazer uma ação de 'Produto' já realizada.\n(A ação escolhida deve ser aprovada pelo Mestre)";
+    } else if (classe === 'Líder') {
+        nomeHabilidade = "Liderar pelo Exemplo";
+        confirmMsg = "Tem certeza que quer usar 'Liderar pelo Exemplo'?\n\nEfeito: Permite refazer uma ação de 'Equipe' já realizada.\n(A ação escolhida deve ser aprovada pelo Mestre)";
+    } else if (classe === 'Estrategista') {
+        nomeHabilidade = "Análise de Risco";
+        confirmMsg = "Tem certeza que quer usar 'Análise de Risco'?\n\nEfeito: Gasta sua ação individual para anular o próximo evento negativo neste turno.\n(Deve ser aprovado pelo Mestre)";
+    }
+
+    showConfirm('Confirmar Habilidade', confirmMsg, () => { 
+        playAudio('audio-clique');
+        modoHabilidade = true; 
+        
+        document.querySelectorAll("#player-turn-selector button").forEach((b) => (b.disabled = true));
+        hudHabilidadeBtn.disabled = true;
+
+        if (classe === 'Visionário' || classe === 'Líder') {
+            currentDimensaoFilter = (classe === 'Visionário') ? 'produto' : 'equipe';
+            document.querySelectorAll(".filtro-btn").forEach((b) => {
+                b.classList.toggle("active", b.getAttribute("data-filtro") === currentDimensaoFilter);
+                b.disabled = true;
+            });
+            document.querySelector(`.filtro-${currentDimensaoFilter}`).disabled = false;
+
+            renderAcoes(
+                estadoJogoAtual.startups.find(s => s.nome === meuNomeStartup),
+                estadoJogoAtual.fase_atual,
+                estadoJogoAtual.submissoes_pendentes[meuNomeStartup]
+            );
+            
+        } else {
+            actionSelectionArea.classList.add('hidden');
+            
+            acaoSelecionada = {
+                id: acaoId,
+                acao_nome: nomeHabilidade, 
+                nome_startup: meuNomeStartup, 
+                dimensao: dimensao,
+                tipo_acao: 'habilidade',
+                jogador_nome: jogadorSelecionado.nome,
+                classe_jogador: jogadorSelecionado.classe
+            };
+
+            justificativaContainer.classList.remove("hidden");
+            
+            if (classe === 'Desbravador') {
+                const oponentes = estadoJogoAtual.startups.filter(s => s.nome !== meuNomeStartup && !s.esta_eliminada);
+                alvoSelect.innerHTML = '<option value="">-- Escolha um oponente --</option>';
+                oponentes.forEach(op => {
+                    alvoSelect.innerHTML += `<option value="${op.nome}">${op.nome}</option>`;
+                });
+                alvoContainer.classList.remove('hidden');
+            }
+            
+            justificativaTextarea.focus();
+        }
+    });
+}
+
 function desabilitarControles(mensagem) {
     if (turnoInfoBox) {
         turnoInfoBox.innerHTML = `<h2>${mensagem}</h2>`;
     }
+    actionSelectionArea.classList.remove('hidden'); 
+    alvoContainer.classList.add('hidden'); 
+    
     if (acoesDisponiveisDiv) {
         acoesDisponiveisDiv.querySelectorAll(".acao-button").forEach((btn) => {
             btn.disabled = true;
             btn.classList.add("disabled-by-affinity");
         });
     }
+    if (dimensaoFiltrosContainer) {
+        dimensaoFiltrosContainer.querySelectorAll(".filtro-btn").forEach((btn) => {
+            btn.disabled = true;
+        });
+    }
     if (justificativaContainer) justificativaContainer.classList.add("hidden");
-    if (submitAcaoBtn) submitAcaoBtn.classList.add("hidden");
     if (playerTurnSelectorDiv) playerTurnSelectorDiv.innerHTML = "";
     hidePlayerHUD();
 }
 
 function habilitarControles() {
-    console.log("Controlos habilitados.");
+    actionSelectionArea.classList.remove('hidden');
+    if (dimensaoFiltrosContainer) {
+        dimensaoFiltrosContainer.querySelectorAll(".filtro-btn").forEach((btn) => {
+            btn.disabled = false;
+        });
+    }
+    console.log("Controles habilitados.");
 }
 
-// --- Funções de Ajuda (Copiadas) ---
 function setupFiltrosDimensao() {
     dimensaoFiltrosContainer.innerHTML = "";
     const filtros = [
@@ -503,7 +551,13 @@ function setupFiltrosDimensao() {
     dimensaoFiltrosContainer.addEventListener("click", (e) => {
         const btn = e.target.closest(".filtro-btn");
         if (!btn) return;
-        playAudio("audio-clique");
+        
+        if (modoHabilidade) {
+            modoHabilidade = false;
+            document.querySelectorAll("#player-turn-selector button").forEach((b) => (b.disabled = false));
+        }
+        
+        playAudio("audio-clique"); 
         const filtroId = btn.getAttribute("data-filtro");
         currentDimensaoFilter = filtroId;
         document.querySelectorAll(".filtro-btn").forEach((b) => {
@@ -524,108 +578,13 @@ function setupFiltrosDimensao() {
         );
     });
 }
-function showClasseModal(jogador) {
-    console.log("showClasseModal foi chamada com:", jogador);
-    classeCard.className = "flashcard";
-    classeCard.classList.remove("is-flipped");
-    const classeCor = `classe-${jogador.classe.toLowerCase()}`;
-    classeCard.classList.add(classeCor);
-    classeCardFront.innerHTML = `<h3>${jogador.classe}</h3><p>${jogador.nome}</p>`;
-    classeCardBack.innerHTML = `<h3>${jogador.classe}</h3><p>${jogador.descricao}</p>`;
-    classeModal.classList.remove("hidden");
-}
-function hideClasseModal() {
-    classeModal.classList.add("hidden");
-    classeCard.classList.remove("is-flipped");
-}
-classeCard.addEventListener("click", () => {
-    playAudio("audio-virar-carta");
-    classeCard.classList.toggle("is-flipped");
-});
-classeModal.addEventListener("click", (e) => {
-    if (e.target === classeModal) hideClasseModal();
-});
-let resolveEventoPromise;
-function showEventoModal(evento) {
-    eventoCard.className = "flashcard";
-    eventoCard.classList.remove("is-flipped");
-    eventoNome.innerText = evento.nome;
-    eventoDescricao.innerText = evento.descricao;
-    let resultadoTexto = "";
-    if (evento.tipo === "positivo") {
-        eventoCard.classList.add("evento-positivo");
-        resultadoTexto = evento.bonus_ativado
-            ? "Bônus Ativado!"
-            : "Bônus Perdido.";
-        playAudio("audio-sucesso");
-    } else {
-        if (evento.anulado) {
-            eventoCard.classList.add("evento-anulado");
-            resultadoTexto = "Efeito Anulado!";
-            playAudio("audio-sucesso");
-        } else {
-            eventoCard.classList.add("evento-negativo");
-            resultadoTexto = "Efeito Aplicado!";
-            playAudio("audio-falha");
-        }
-    }
-    if (evento.mensagem_final.includes("ELIMINADA")) {
-        resultadoTexto = "ELIMINADA!";
-        eventoCard.classList.add("evento-negativo");
-        playAudio("audio-falha");
-    }
-    eventoResultado.innerText = resultadoTexto;
-    eventoModal.classList.remove("hidden");
-    return new Promise((resolve) => {
-        resolveEventoPromise = resolve;
-    });
-}
-function hideEventoModal() {
-    eventoModal.classList.add("hidden");
-    eventoCard.classList.remove("is-flipped");
-    if (resolveEventoPromise) {
-        resolveEventoPromise();
-        resolveEventoPromise = null;
-    }
-}
-eventoCard.addEventListener("click", () => {
-    playAudio("audio-virar-carta");
-    eventoCard.classList.toggle("is-flipped");
-});
-eventoModal.addEventListener("click", (e) => {
-    if (e.target === eventoModal) hideEventoModal();
-});
-function showFimDeJogo(nomeVencedor) {
-    playAudio("audio-vitoria");
-    vencedorNome.innerText = `A startup "${nomeVencedor}" venceu!`;
-    fimDeJogoModal.classList.remove("hidden");
-    gameBoardDiv.classList.add("hidden");
-    hidePlayerHUD();
-}
-jogarNovamenteBtn.addEventListener("click", () => {
-    playAudio("audio-clique");
-    window.location.href = "/";
-});
-function showBibliotecaModal() {
-    playAudio("audio-virar-carta");
-    bibliotecaModal.classList.remove("hidden");
-}
-function hideBibliotecaModal() {
-    bibliotecaModal.classList.add("hidden");
-}
-function normalizeClassName(className) {
-    return className
-        .toLowerCase()
-        .replace("í", "i")
-        .replace("ã", "a")
-        .replace("á", "a");
-}
+
 function updatePlayerHUD(jogador) {
     if (!jogador) {
         hidePlayerHUD();
         return;
     }
-    const classeLimpa = normalizeClassName(jogador.classe);
+    const classeLimpa = normalizeClassName(jogador.classe); 
     const imgPath = `/css/img/portraits/${classeLimpa}.png`;
     hudJogadorImg.src = imgPath;
     playerHUD.className = "";
@@ -638,16 +597,57 @@ function updatePlayerHUD(jogador) {
         afinidade.charAt(0).toUpperCase() + afinidade.slice(1);
     hudAfinidadeDesc.innerText = `Afinidade: ${afinidadeCapitalizada}`;
     playerHUD.classList.remove("hidden");
+
+    loadHudState(); 
+
+    hudHabilidadeBtn.classList.remove('hidden');
+    if (jogador.habilidade_usada) {
+        hudHabilidadeBtn.disabled = true;
+        hudHabilidadeBtn.innerText = "Habilidade Usada";
+    } else {
+        hudHabilidadeBtn.disabled = false;
+        let nomeHabilidade = `Usar ${jogador.classe}`; 
+        if (jogador.classe === "Líder") nomeHabilidade = "Liderar pelo Exemplo";
+        if (jogador.classe === "Guardião") nomeHabilidade = "Rodada de Investimento";
+        if (jogador.classe === "Visionário") nomeHabilidade = "Iteração Rápida";
+        if (jogador.classe === "Desbravador") nomeHabilidade = "Marketing Agressivo";
+        if (jogador.classe === "Estrategista") nomeHabilidade = "Análise de Risco";
+        
+        hudHabilidadeBtn.innerText = nomeHabilidade;
+    }
 }
+
 function hidePlayerHUD() {
     playerHUD.classList.add("hidden");
     hudJogadorImg.src = "";
+    hudHabilidadeBtn.classList.add('hidden');
 }
-// --- FIM DAS FUNÇÕES DE AJUDA ---
 
-// --- LÓGICA PRINCIPAL DO JOGADOR ---
+function setupSidebarTabs() {
+    if (!sidebarTabs) return;
+    sidebarTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.sidebar-tab-btn');
+        if (!btn) return;
 
-// 1. Ouvir por atualizações de estado do servidor
+        playAudio('audio-clique'); 
+        const tabId = btn.dataset.tab; 
+
+        sidebarTabs.querySelectorAll('.sidebar-tab-btn').forEach(b => {
+            b.classList.remove('active');
+        });
+        document.querySelectorAll('#jogador-controles .sidebar-panel').forEach(p => {
+            p.classList.remove('active');
+        });
+
+        btn.classList.add('active');
+        const panel = document.getElementById(`${tabId}-panel`);
+        if (panel) {
+            panel.classList.add('active');
+        }
+    });
+}
+
+
 socket.on("atualizar_estado", (gameState) => {
     console.log("Estado do jogo recebido:", gameState);
     estadoJogoAtual = gameState; 
@@ -667,13 +667,18 @@ socket.on("atualizar_estado", (gameState) => {
         return;
     }
     
-    // *** MELHORIA FEEDBACK (Início) ***
-    // Chama a nova função para renderizar TODOS os cards
     renderTodosOsCards(gameState.startups, gameState.fase_atual, gameState.submissoes_pendentes);
-    // *** MELHORIA FEEDBACK (Fim) ***
 
     const faseAtual = gameState.fase_atual;
     const minhaSubmissao = gameState.submissoes_pendentes[meuNomeStartup];
+
+    if (jogadorSelecionado) {
+        const jogadorAtualizado = minhaStartup.jogadores.find(j => j.nome === jogadorSelecionado.nome);
+        if (jogadorAtualizado) {
+            jogadorSelecionado = jogadorAtualizado; 
+            updatePlayerHUD(jogadorSelecionado);
+        }
+    }
 
     updateTurnoInfo(minhaStartup, faseAtual, minhaSubmissao);
     renderAcoes(minhaStartup, faseAtual, minhaSubmissao);
@@ -681,9 +686,8 @@ socket.on("atualizar_estado", (gameState) => {
     if (
         faseAtual === "RESOLUCAO" ||
         (faseAtual === "COLETIVA" && minhaSubmissao.coletiva) ||
-        (faseAtual === "INDIVIDUAL" && minhaSubmissao.individual)
+        (faseAtual === "INDIVIDUAL" && (minhaSubmissao.individual || minhaSubmissao.habilidade))
     ) {
-        // Se a minha startup foi eliminada, mostra uma mensagem diferente
         if (minhaStartup.esta_eliminada) {
             desabilitarControles("A sua startup foi eliminada.");
         } else {
@@ -694,29 +698,35 @@ socket.on("atualizar_estado", (gameState) => {
     }
 });
 
-// 2. Ouvir por eventos específicos
+socket.on("log_mensagem", (data) => {
+    addLogMessage(data.mensagem, data.tipo);
+});
+
 socket.on("evento_subir_de_nivel", async (evento) => {
     console.log("Recebeu evento de subir de nível:", evento);
     await showEventoModal(evento);
 });
 
-// 3. Ouvir pelo fim do jogo
 socket.on("jogo_terminou", (vencedor) => {
     console.log("O jogo terminou! Vencedor:", vencedor);
     showFimDeJogo(vencedor);
 });
 
-// 4. Ouvir por erros
 socket.on("jogo_nao_encontrado", () => {
-    alert("ERRO: O Mestre saiu ou a sala deste jogo não foi encontrada.");
-    window.location.href = "/";
+    showPopup('Erro de Conexão', 'ERRO: O Mestre saiu ou a sala deste jogo não foi encontrada.', 'erro');
+    setTimeout(() => window.location.href = "/", 2000);
 });
 
-// 5. NOVO: Ouvir por ação recusada
+socket.on("erro_jogo", (data) => {
+    showPopup('Erro do Servidor', data.mensagem, 'erro'); 
+    if (jogadorSelecionado && !jogadorSelecionado.habilidade_usada) {
+         hudHabilidadeBtn.disabled = false;
+         updatePlayerHUD(jogadorSelecionado);
+    }
+});
+
 socket.on("acao_recusada", (acaoRecusada) => {
-    alert(
-        `A sua ação "${acaoRecusada.acao_nome}" foi recusada pelo Mestre. Por favor, submeta novamente.`
-    );
+    showPopup('Ação Recusada', `A sua ação "${acaoRecusada.acao_nome}" foi recusada pelo Mestre. Por favor, submeta novamente.`, 'aviso');
     if (acaoRecusada.tipo_acao === "coletiva") {
         acoesSubmetidasLocal.coletiva = false;
     } else {
@@ -725,19 +735,18 @@ socket.on("acao_recusada", (acaoRecusada) => {
     socket.emit("jogador_pedir_estado", { id_sala: idSala });
 });
 
-// --- INICIALIZAÇÃO DO JOGADOR ---
 function iniciarConexaoJogador() {
     loadInitialTheme();
+    setupSidebarTabs(); 
+    loadHudState(); 
 
     const urlParams = new URLSearchParams(window.location.search);
     idSala = urlParams.get("sala");
     meuNomeStartup = urlParams.get("startup");
 
-    if (!idSala || !meuNomeStartup) {
-        alert(
-            "Erro: ID da Sala ou nome da Startup em falta. A voltar para o início."
-        );
-        window.location.href = "/";
+     if (!idSala || !meuNomeStartup) {
+        showPopup('Erro', 'Erro: ID da Sala ou nome da Startup em falta. A voltar para o início.', 'erro');
+        setTimeout(() => window.location.href = "/", 2000);
         return;
     }
 
@@ -747,17 +756,14 @@ function iniciarConexaoJogador() {
     });
 
     submitAcaoBtn.addEventListener("click", submeterAcao);
+    justificativaBtnCancelar.addEventListener("click", cancelarAcao);
     themeToggleBtnGame.addEventListener("click", toggleTheme);
+    hudHabilidadeBtn.addEventListener("click", usarHabilidade);
 
-    // Listeners dos Modais
-    fecharBibliotecaBtn.addEventListener("click", () => {
-        playAudio("audio-clique");
-        hideBibliotecaModal();
-    });
-    bibliotecaModal.addEventListener("click", (e) => {
-        if (e.target === bibliotecaModal) hideBibliotecaModal();
-    });
-    console.log("Anexando listener de delegação ao startupCardsContainer.");
+    if (hudToggleBtn) {
+        hudToggleBtn.addEventListener("click", toggleHudMinimize);
+    }
+
     startupCardsContainer.addEventListener("click", (e) => {
         const playerLi = e.target.closest(".player-name");
         if (playerLi) {

@@ -4,45 +4,46 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dashboard do Mestre - Empreendedorismo Guru</title>
-        <link rel="icon" type="image/png" href="/css/img/Logo.svg" />
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link rel="stylesheet" href="/css/style.css" />
+        <link rel="icon" type="image/svg+xml" href="/css/img/Logo.svg" /> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="/css/style.css?v=2" />
     </head>
     <body>
         <div id="game-board">
             <div id="game-header">
-                <h2>
-                    Fase Atual: <span id="current-phase-name">Aguardando...</span>
-                </h2>
-                <div class="header-controls">
-                    <button id="save-game-btn" class="button-secondary">
-                        Salvar Jogo
-                    </button>
-                    <button id="theme-toggle-btn-game" class="theme-toggle-btn">
-                        🌙
-                    </button>
+                <div class="header-content-wrapper"> 
+                    <div class="header-info">
+                        <h2>
+                            Fase Atual: <span id="current-phase-name">Aguardando...</span>
+                        </h2>
+                        <div id="market-condition-display" class="market-condition-banner hidden">
+                            <strong id="market-condition-name"></strong>
+                            <span id="market-condition-desc"></span>
+                        </div>
+                    </div>
+                    <div class="header-controls">
+                        <button id="save-game-btn" class="button-secondary">
+                            Salvar Jogo
+                        </button>
+                        <button id="theme-toggle-btn-game" class="theme-toggle-btn">
+                            🌙
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div id="main-content-wrapper">
                 <div id="startup-cards-container">
                     </div>
-
                 <div class="turn-controls-container">
-                    <button
-                        id="avancar-fase-btn"
-                        class="button-fase hidden"
-                    >
+                    <button id="avancar-fase-btn" class="button-fase hidden">
                         Iniciar Fase Individual
                     </button>
-                    <button
-                        id="resolver-turno-btn"
-                        class="button-resolver hidden"
-                    >
+                    <button id="resolver-turno-btn" class="button-resolver hidden">
                         Resolver Turno Completo
                     </button>
                 </div>
             </div>
+
             <div id="controls-and-log" class="controls-sidebar">
                 <div class="sidebar-tabs">
                     <button class="sidebar-tab-btn active" data-tab="acoes">
@@ -58,117 +59,90 @@
 
                 <div class="sidebar-content">
                     <div id="acoes-panel" class="sidebar-panel active">
-                        <div id="dimensao-filtros">
-                            </div>
-                        <div id="acoes-disponiveis">
-                            </div>
+                        <div id="dimensao-filtros"></div>
+                        <div id="acoes-disponiveis"></div>
                     </div>
-
                     <div id="fila-panel" class="sidebar-panel">
-                        <ul id="validacao-fila-list">
-                            </ul>
+                        <ul id="validacao-fila-list"></ul>
                     </div>
-
                     <div id="log-panel" class="sidebar-panel">
-                        <ul id="log-list">
-                            </ul>
+                        <ul id="log-list"></ul>
                     </div>
-                </div>
-            </div>
-
-            <div id="player-hud" class="hidden">
-                <img id="hud-jogador-img" src="" alt="Retrato do Jogador" />
-                <div class="hud-info">
-                    <h4 id="hud-classe-nome"></h4>
-                    <p id="hud-jogador-nome"></p>
-                    <p id="hud-afinidade-desc"></p>
                 </div>
             </div>
         </div>
 
         <div id="validacao-modal" class="modal-overlay hidden">
-            <div class="validacao-content">
+            <div class="modal-content validacao-modal-content">
                 <h2>Validar Ação</h2>
-                <h3>Startup: <span id="validacao-startup-nome"></span></h3>
-                <h4>Ação: <span id="validacao-acao-nome"></span></h4>
-                <p>Justificativa da Equipe:</p>
-                <blockquote id="validacao-justificativa"></blockquote>
-                <div class="validacao-botoes">
-                    <button id="validacao-btn-recusar" class="button-recusar">
-                        Recusar
-                    </button>
-                    <button id="validacao-btn-aprovar" class="button-aprovar">
-                        Aprovar
-                    </button>
+
+                <div id="player-hud" class="hidden">
+                    <img id="hud-jogador-img" src="" alt="Retrato do Jogador" />
+                    <div class="hud-info">
+                        <h4 id="hud-classe-nome"></h4>
+                        <p id="hud-jogador-nome"></p>
+                        <p id="hud-afinidade-desc"></p>
+                    </div>
+                </div>
+                <div class="validacao-info">
+                    <p><strong>Startup:</strong> <span id="validacao-startup-nome"></span></p>
+                    <p><strong>Ação:</strong> <span id="validacao-acao-nome"></span></p>
+                    <p><strong>Justificativa:</strong></p>
+                    <blockquote id="validacao-justificativa"></blockquote>
+                </div>
+                <div class="modal-buttons">
+                    <button id="validacao-btn-recusar" class="button-recusar">Recusar</button>
+                    <button id="validacao-btn-aprovar" class="button-aprovar">Aprovar</button>
                 </div>
             </div>
         </div>
-
         <div id="classe-modal" class="modal-overlay hidden">
-            <div class="flashcard-container">
-                <div id="classe-card" class="flashcard">
-                    <div id="classe-card-front" class="front"></div>
-                    <div id="classe-card-back" class="back"></div>
-                </div>
+            <div class="flashcard" id="classe-card">
+                <div class="flashcard-front" id="classe-card-front"></div>
+                <div class="flashcard-back" id="classe-card-back"></div>
             </div>
         </div>
-
         <div id="evento-modal" class="modal-overlay hidden">
-            <div class="flashcard-container">
-                <div id="evento-card" class="flashcard">
-                    <div id="evento-card-front" class="front">
-                        <h3>Evento Misterioso!</h3>
-                        <p>Clique para revelar</p>
-                    </div>
-                    <div id="evento-card-back" class="back">
-                        <h3 id="evento-nome"></h3>
-                        <p id="evento-descricao"></p>
-                        <p
-                            id="evento-resultado"
-                            class="evento-resultado-texto"
-                        ></p>
-                    </div>
+            <div class="flashcard" id="evento-card">
+                <div class="flashcard-front">
+                    <h3 id="evento-nome"></h3>
+                    <p id="evento-descricao"></p>
+                </div>
+                <div class="flashcard-back">
+                    <h3 id="evento-resultado"></h3>
                 </div>
             </div>
         </div>
-
         <div id="fim-de-jogo-modal" class="modal-overlay hidden">
-            <div class="fim-de-jogo-content">
-                <h2>O Jogo Terminou!</h2>
-                <h3 id="vencedor-nome"></h3>
-                <p>
-                    Parabéns por completar a jornada do Empreendedorismo Guru!
-                </p>
-                <button id="jogar-novamente-btn">Jogar Novamente</button>
+            <div class="popup-content tipo-sucesso">
+                <h2>Fim de Jogo!</h2>
+                <p id="vencedor-nome"></p>
+                <button id="jogar-novamente-btn" class="button-aprovar">Voltar ao Início</button>
             </div>
         </div>
-
         <div id="biblioteca-modal" class="modal-overlay hidden">
-            <div class="biblioteca-content">
-                <h2>Biblioteca</h2>
+            <div class="modal-content">
+                <h2>Biblioteca de Ações</h2>
+                <p>Conteúdo da biblioteca...</p>
                 <button id="fechar-biblioteca-btn">Fechar</button>
+            </div>
+        </div>
+        <div id="popup-modal" class="modal-overlay hidden">
+            <div class="popup-content">
+                <h3 id="popup-title"></h3>
+                <p id="popup-message"></p>
+                <div id="popup-buttons" class="custom-modal-buttons"></div>
             </div>
         </div>
 
         <audio id="audio-clique" src="/audio/clique.mp3" preload="auto"></audio>
-        <audio
-            id="audio-virar-carta"
-            src="/audio/virar-carta.mp3"
-            preload="auto"
-        ></audio>
-        <audio
-            id="audio-sucesso"
-            src="/audio/sucesso.mp3"
-            preload="auto"
-        ></audio>
+        <audio id="audio-virar-carta" src="/audio/virar-carta.mp3" preload="auto"></audio>
+        <audio id="audio-sucesso" src="/audio/sucesso.mp3" preload="auto"></audio>
         <audio id="audio-falha" src="/audio/falha.mp3" preload="auto"></audio>
-        <audio
-            id="audio-vitoria"
-            src="/audio/vitoria.mp3"
-            preload="auto"
-        ></audio>
+        <audio id="audio-vitoria" src="/audio/vitoria.mp3" preload="auto"></audio>
 
         <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+        <script src="/js/script.js"></script>
         <script src="/js/mestre.js"></script>
     </body>
 </html>

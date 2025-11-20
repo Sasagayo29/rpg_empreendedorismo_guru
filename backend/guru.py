@@ -1,6 +1,5 @@
 import random
 
-# AÇÕES EMPREENDEDORAS (sem alterações)
 ACOES_EMPREENDEDORAS = {
     "equipe": [{"id": "eq1", "nome": "Estabelecimento de Metas"}, {"id": "eq2", "nome": "Definição de Papéis e Responsabilidades"}, {"id": "eq3", "nome": "Criação do Código de Cultura da Startup"}, {"id": "eq4", "nome": "Workshop de Feedback Construtivo"}, {"id": "eq5", "nome": "Mapeamento de Competências (Skill Matrix)"}, {"id": "eq6", "nome": "Plano de Reuniões Eficazes (One-on-Ones)"}, {"id": "eq7", "nome": "Pesquisa de Clima Organizacional"}, {"id": "eq8", "nome": "Desenho do Plano de Onboarding"}, {"id": "eq9", "nome": "Sessão de Resolução de Conflitos"}, {"id": "eq10", "nome": "Apresentação da Visão de Longo Prazo"}],
     "produto": [{"id": "pd1", "nome": "Brainstorming de Funcionalidades (Features)"}, {"id": "pd2", "nome": "Criação de um Protótipo de Baixa Fidelidade"}, {"id": "pd3", "nome": "Sessão de Teste de Usabilidade com Usuários"}, {"id": "pd4", "nome": "Desenvolvimento do MVP (Mínimo Produto Viável)"}, {"id": "pd5", "nome": "Elaboração do Roadmap do Produto"}, {"id": "pd6", "nome": "Análise de Métricas de Engajamento (Analytics)"}, {"id": "pd7", "nome": "Workshop de Design Thinking"}, {"id": "pd8", "nome": "Definição da Proposta Única de Valor (PUV)"}, {"id": "pd9", "nome": "Pesquisa de Tecnologias Emergentes"}, {"id": "pd10", "nome": "Plano de Lançamento (Go-to-Market)"}],
@@ -34,6 +33,15 @@ BARALHO_DE_EVENTOS = [
     {"tipo": "positivo", "nome": "Concorrente Encerra Operações", "descricao": "Um de seus concorrentes diretos anunciou que está fechando, abrindo uma nova fatia de mercado para você.", "efeito": {"competitividade": 2}, "condicao": {"classe": "Estrategista", "acao": "Análise de Concorrentes (Benchmarking)"}},
 ]
 
+BARALHO_DE_CONDICOES = [
+    {"id": "c1", "nome": "Turno Normal", "descricao": "O mercado está estável. Todas as ações valem 1 ponto.", "efeito": {}},
+    {"id": "c2", "nome": "Boom Tecnológico", "descricao": "Novas tecnologias emergem! Ações de 'Produto' valem +2 pontos este turno.", "efeito": {"dimensao": "produto", "pontos": 2}},
+    {"id": "c3", "nome": "Alta Demanda de Mercado", "descricao": "Os clientes estão procurando soluções! Ações de 'Mercado' valem +2 pontos este turno.", "efeito": {"dimensao": "mercado", "pontos": 2}},
+    {"id": "c4", "nome": "Crise Econômica", "descricao": "Investidores estão cautelosos! Ações de 'Recursos' valem 0 pontos este turno.", "efeito": {"dimensao": "recursos", "pontos": 0}},
+    {"id": "c5", "nome": "Guerra de Talentos", "descricao": "Encontrar bons profissionais está difícil! Ações de 'Equipe' valem 0 pontos este turno.", "efeito": {"dimensao": "equipe", "pontos": 0}},
+    {"id": "c6", "nome": "Mercado Saturado", "descricao": "A competição está acirrada! Ações de 'Competitividade' valem +2 pontos este turno.", "efeito": {"dimensao": "competitividade", "pontos": 2}}
+]
+
 
 class Jogador:
     def __init__(self, nome, classe):
@@ -41,13 +49,15 @@ class Jogador:
         self.classe = classe
         self.dimensao_afinidade = self.definir_afinidade()
         self.descricao = self.definir_descricao()
+        self.habilidade_usada = False 
 
     def get_info(self):
         return {
             "nome": self.nome,
             "classe": self.classe,
             "dimensao_afinidade": self.dimensao_afinidade,
-            "descricao": self.descricao
+            "descricao": self.descricao,
+            "habilidade_usada": self.habilidade_usada
         }
 
     def definir_afinidade(self):
@@ -76,6 +86,7 @@ class Startup:
         self.nivel = 1
         self.acoes_realizadas = []
         self.esta_eliminada = False
+        self.buffs = {"analise_de_risco": False} 
 
     def get_status(self):
         return {
@@ -85,8 +96,12 @@ class Startup:
             "dimensoes": self.dimensoes, 
             "jogadores": [j.get_info() for j in self.jogadores], 
             "acoes_realizadas": self.acoes_realizadas,
-            "esta_eliminada": self.esta_eliminada
+            "esta_eliminada": self.esta_eliminada,
+            "buffs": self.buffs
         }
+    
+    def get_jogador_by_name(self, nome_jogador):
+        return next((j for j in self.jogadores if j.nome == nome_jogador), None)
 
     def eliminar_startup(self):
         self.esta_eliminada = True
@@ -95,6 +110,8 @@ class Startup:
 
     def aplicar_ponto(self, dimensao, pontos=1):
         if dimensao in self.dimensoes and not self.esta_eliminada:
+            if pontos == 0:
+                return
             self.dimensoes[dimensao] += pontos
             if self.dimensoes[dimensao] <= 0:
                 self.eliminar_startup()
@@ -120,6 +137,7 @@ class Jogo:
         self.vencedor = None
         self.fase_atual = "COLETIVA" 
         self.submissoes_pendentes = {} 
+        self.condicao_mercado_atual = BARALHO_DE_CONDICOES[0]
 
     def reiniciar_baralho(self):
         cartas_para_embaralhar = self.descarte if self.descarte else BARALHO_DE_EVENTOS.copy()
@@ -134,12 +152,18 @@ class Jogo:
         self.descarte.append(carta)
         return carta
 
+    def sortear_condicao_mercado(self):
+        nova_condicao = random.choice(BARALHO_DE_CONDICOES[1:]) 
+        self.condicao_mercado_atual = nova_condicao
+        return nova_condicao
+
     def iniciar_jogo(self, dados_equipes):
         self.startups = []
         self.jogo_terminado = False
         self.vencedor = None
         self.fase_atual = "COLETIVA"
         self.submissoes_pendentes = {}
+        self.condicao_mercado_atual = BARALHO_DE_CONDICOES[0] 
         
         for equipe in dados_equipes:
             nome_startup = equipe.get("nome_startup")
@@ -149,7 +173,7 @@ class Jogo:
                 "classe")) for j in dados_jogadores]
             nova_startup = Startup(nome_startup, lista_jogadores, ideia_negocio)
             self.startups.append(nova_startup)
-            self.submissoes_pendentes[nome_startup] = {"coletiva": None, "individual": None}
+            self.submissoes_pendentes[nome_startup] = {"coletiva": None, "individual": None, "habilidade": None}
 
         return [s.get_status() for s in self.startups]
 
@@ -162,14 +186,16 @@ class Jogo:
         elif self.fase_atual == "RESOLUCAO":
             self.fase_atual = "COLETIVA"
             self.limpar_submissoes_pendentes() 
+            self.sortear_condicao_mercado()
         
         return self.fase_atual
 
     def limpar_submissoes_pendentes(self):
-        """Limpa as submissões pendentes para todas as startups ativas."""
+        """Limpa as submissões pendentes E OS BUFFS para todas as startups ativas."""
         for startup in self.startups:
             if not startup.esta_eliminada:
-                self.submissoes_pendentes[startup.nome] = {"coletiva": None, "individual": None}
+                self.submissoes_pendentes[startup.nome] = {"coletiva": None, "individual": None, "habilidade": None}
+                startup.buffs = {"analise_de_risco": False}
 
     def get_startup_by_name(self, name):
         return next((s for s in self.startups if s.nome == name), None)
@@ -182,7 +208,8 @@ class Jogo:
             "fase_atual": self.fase_atual,
             "submissoes_pendentes": self.submissoes_pendentes, 
             "jogo_terminado": self.jogo_terminado,
-            "vencedor": self.vencedor.nome if self.vencedor else None
+            "vencedor": self.vencedor.nome if self.vencedor else None,
+            "condicao_mercado_atual": self.condicao_mercado_atual
         }
 
     def registrar_acao_aprovada(self, acao_data):
@@ -193,25 +220,36 @@ class Jogo:
         if nome_startup not in self.submissoes_pendentes:
             return {"status": "erro", "mensagem": "Startup não encontrada nas submissões."}
             
-        self.submissoes_pendentes[nome_startup][tipo_acao] = acao_data
+        if tipo_acao == 'habilidade':
+            startup = self.get_startup_by_name(nome_startup)
+            if startup:
+                jogador = startup.get_jogador_by_name(acao_data['jogador_nome'])
+                if jogador and not jogador.habilidade_usada:
+                    jogador.habilidade_usada = True
+                else:
+                    return {"status": "erro", "mensagem": "Habilidade já usada ou jogador não encontrado."}
+            
+            self.submissoes_pendentes[nome_startup]['habilidade'] = acao_data
+            
+        elif tipo_acao == 'individual':
+             self.submissoes_pendentes[nome_startup][tipo_acao] = acao_data
+        elif tipo_acao == 'coletiva':
+             self.submissoes_pendentes[nome_startup][tipo_acao] = acao_data
         
         return {"status": "sucesso", "mensagem": f"Ação {tipo_acao} de {nome_startup} registada."}
+
 
     def resolver_turno_completo(self):
         """Executa todas as ações pendentes, aplica pontos e dispara eventos."""
         
-        # *** INÍCIO DA CORREÇÃO 1 ***
-        # A verificação estava errada. Devemos checar se a fase é "INDIVIDUAL"
-        # para então podermos resolvê-la.
         if self.fase_atual != "INDIVIDUAL":
             return {"status": "erro", "mensagem": "Não é a fase de resolução (a fase atual não é INDIVIDUAL)."}
-        # *** FIM DA CORREÇÃO 1 ***
 
         logs = []
         eventos = []
         
-        # 1. Resolve todas as ações pendentes
-        tipos_de_acao = ["coletiva", "individual"]
+        tipos_de_acao = ["habilidade", "coletiva", "individual"]
+        
         for tipo in tipos_de_acao:
             for nome_startup, acoes in self.submissoes_pendentes.items():
                 acao_data = acoes.get(tipo)
@@ -222,25 +260,81 @@ class Jogo:
                 if not startup or startup.esta_eliminada:
                     continue
 
-                acao_id = acao_data['acao_id']
-                dimensao_acao, acao_obj = None, None
-                for dim, lista_acoes in self.acoes.items():
-                    for acao in lista_acoes:
-                        if acao["id"] == acao_id:
-                            dimensao_acao, acao_obj = dim, acao
-                            break
-                    if dimensao_acao: break
+                acao_id = acao_data.get('id') 
+                if not acao_id:
+                    if tipo != 'habilidade': 
+                        logs.append(f"Erro: Ação {acao_data.get('acao_nome')} da {nome_startup} não continha um 'id'.")
+        
+                if tipo == 'habilidade':
+                    classe_jogador = acao_data.get('classe_jogador')
+                    log_msg = ""
+                    
+                    if classe_jogador == 'Guardião':
+                        startup.aplicar_ponto('recursos', 2)
+                        startup.aplicar_ponto('equipe', -1)
+                        log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Rodada de Investimento'! (+2 Recursos, -1 Equipe)"
+                        
+                    elif classe_jogador == 'Desbravador':
+                        alvo_nome = acao_data.get('alvo')
+                        alvo_startup = self.get_startup_by_name(alvo_nome)
+                        if alvo_startup and not alvo_startup.esta_eliminada:
+                            startup.aplicar_ponto('mercado', 1)
+                            alvo_startup.aplicar_ponto('mercado', -1)
+                            log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Marketing Agressivo'! (+1 Mercado) | ({alvo_nome}) perdeu 1 de Mercado."
+                        else:
+                            log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Marketing Agressivo', mas o alvo era inválido. Apenas +1 Mercado foi ganho."
+                            startup.aplicar_ponto('mercado', 1) 
+                            
+                    elif classe_jogador == 'Visionário':
+                        dimensao_acao, acao_obj = self.find_acao_by_id(acao_id)
+                        if dimensao_acao == 'produto' and acao_obj:
+                            startup.aplicar_ponto('produto', 1) 
+                            log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Iteração Rápida' em '{acao_obj['nome']}'! (+1 Produto)"
+                        else:
+                             log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Iteração Rápida' mas falhou."
+                    
+                    elif classe_jogador == 'Líder':
+                        dimensao_acao, acao_obj = self.find_acao_by_id(acao_id)
+                        if dimensao_acao == 'equipe' and acao_obj:
+                            startup.aplicar_ponto('equipe', 1) 
+                            log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Liderar pelo Exemplo' em '{acao_obj['nome']}'! (+1 Equipe)"
+                        else:
+                             log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Liderar pelo Exemplo' mas falhou."
+                    
+                    elif classe_jogador == 'Estrategista':
+                        startup.buffs["analise_de_risco"] = True 
+                        log_msg = f"({nome_startup}) {acao_data['jogador_nome']} usou 'Análise de Risco'! A startup está protegida do próximo evento negativo neste turno."
+                    
+                    if log_msg:
+                        logs.append({"mensagem": log_msg, "tipo": "log-sucesso"})
+                    
+                    continue 
+                
+                dimensao_acao, acao_obj = self.find_acao_by_id(acao_id)
                 
                 if not dimensao_acao:
-                    logs.append(f"Erro: Ação {acao_data['acao_nome']} não encontrada.")
+                    logs.append(f"Erro: Ação {acao_data.get('acao_nome')} não encontrada.")
                     continue
 
-                # --- Ação Válida, Aplica o Ponto ---
                 if acao_obj['nome'] not in startup.acoes_realizadas:
-                    startup.aplicar_ponto(dimensao_acao)
+                    pontos_a_aplicar = 1 
+                    condicao = self.condicao_mercado_atual.get("efeito", {})
+                    if condicao.get("dimensao") == dimensao_acao:
+                        pontos_a_aplicar = condicao.get("pontos", 1)
+                    
+                    startup.aplicar_ponto(dimensao_acao, pontos_a_aplicar)
                     startup.acoes_realizadas.append(acao_obj['nome'])
+                    
+                    log_efeito = ""
+                    if pontos_a_aplicar > 1:
+                        log_efeito = f" (Bônus de Mercado! +{pontos_a_aplicar} pontos)"
+                    elif pontos_a_aplicar == 0:
+                        log_efeito = " (Crise de Mercado! 0 pontos)"
+                    else:
+                        log_efeito = f" (+{pontos_a_aplicar} ponto)"
+                    
                     logs.append({
-                        "mensagem": f"Ação '{acao_obj['nome']}' (de {acao_data['jogador_nome']}) da {nome_startup} foi resolvida! +1 ponto em '{dimensao_acao}'.",
+                        "mensagem": f"Ação '{acao_obj['nome']}' (de {acao_data['jogador_nome']}) da {nome_startup} foi resolvida!{log_efeito} em '{dimensao_acao}'.",
                         "tipo": "log-normal"
                     })
                 else:
@@ -249,8 +343,6 @@ class Jogo:
                         "tipo": "log-aviso"
                     })
 
-
-        # 2. Após aplicar TODOS os pontos, verifica evoluções e eventos
         for startup in self.startups:
             if startup.esta_eliminada:
                 continue
@@ -261,7 +353,7 @@ class Jogo:
                     "mensagem": f"A startup {startup.nome} subiu de nível!",
                     "tipo": "log-info"
                 })
-                evento = self.disparar_evento(startup)
+                evento = self.disparar_evento(startup) 
                 if evento:
                     eventos.append({"startup_nome": startup.nome, "evento": evento})
                     
@@ -273,7 +365,6 @@ class Jogo:
                     
                     logs.append({"mensagem": f"({startup.nome}) {evento['mensagem_final']}", "tipo": tipo_log_evento})
 
-        # 3. Verifica condições de vitória
         startups_ativas = [s for s in self.startups if not s.esta_eliminada]
         
         if len(startups_ativas) == 1 and not self.jogo_terminado:
@@ -288,11 +379,7 @@ class Jogo:
                 eventos = []
                 break
         
-        # *** INÍCIO DA CORREÇÃO 2 ***
-        # Esta linha é necessária para mover a fase de "INDIVIDUAL" para "RESOLUCAO".
-        # O Mestre irá então, manualmente, avançar de "RESOLUCAO" para "COLETIVA".
-        self.avancar_fase() 
-        # *** FIM DA CORREÇÃO 2 ***
+        self.avancar_fase()
 
         return {
             "status": "sucesso",
@@ -302,14 +389,28 @@ class Jogo:
             "vencedor": self.vencedor.nome if self.vencedor else None
         }
 
-    def disparar_evento(self, startup):
+    def find_acao_by_id(self, acao_id):
+        """Helper para encontrar uma ação e sua dimensão pelo ID."""
+        for dim, lista_acoes in self.acoes.items():
+            for acao in lista_acoes:
+                if acao["id"] == acao_id:
+                    return dim, acao
+        return None, None
+
+    def disparar_evento(self, startup): 
         evento = self.comprar_carta()
         evento_resultado = evento.copy()
         evento_resultado["mensagem_final"] = f"Evento: {evento['nome']} - {evento['descricao']}"
 
         if evento['tipo'] == 'negativo':
             anulado = False
-            if any(j.classe == evento['anulavel_por']['classe'] for j in startup.jogadores):
+            
+            if startup.buffs.get("analise_de_risco"):
+                anulado = True
+                startup.buffs["analise_de_risco"] = False 
+                evento_resultado["mensagem_final"] += f"\nEfeito NEGADO pela habilidade 'Análise de Risco' do Estrategista!"
+            
+            elif any(j.classe == evento['anulavel_por']['classe'] for j in startup.jogadores):
                 anulado = True
                 evento_resultado["mensagem_final"] += f"\nEfeito NEGADO pela presença de um {evento['anulavel_por']['classe']}!"
             elif evento['anulavel_por']['acao'] in startup.acoes_realizadas:
