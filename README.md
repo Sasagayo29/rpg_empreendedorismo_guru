@@ -1,4 +1,4 @@
-# 🚀 Empreendedorismo Guru RPG - O Jogo Web
+# 🚀 Empreendedorismo Guru Web - O Jogo
 
 ![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
