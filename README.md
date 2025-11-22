@@ -77,7 +77,7 @@ Os jogadores assumem papéis específicos (Classes) dentro de suas startups e de
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/seu-usuario/empreendedorismo-guru.git](https://github.com/seu-usuario/empreendedorismo-guru.git)
+    git clone https://github.com/seu-usuario/empreendedorismo-guru.git
     ```
 
 2.  **Acesse a pasta do projeto:**
